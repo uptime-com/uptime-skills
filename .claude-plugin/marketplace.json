@@ -1,0 +1,14 @@
+{
+  "name": "uptime-com",
+  "owner": {
+    "name": "Uptime.com",
+    "url": "https://uptime.com"
+  },
+  "plugins": [
+    {
+      "name": "uptime",
+      "source": "./",
+      "description": "Set up monitoring, triage incidents, and audit SRE coverage with Uptime.com."
+    }
+  ]
+}
