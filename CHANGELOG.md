@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0] - 2026-03-18
+
+### Added
+
+- Auth and read-only tool permissions documentation in README
+- Direct scripting references in monitoring-setup and check-management skills
+- Trigger phrases for transaction checks, smoke tests, and API checks
+- Prettier and EditorConfig for consistent markdown formatting
+
+### Fixed
+
+- Skills now reference scripting-txn and scripting-api directly (one hop, not two)
+
 ## [0.2.0] - 2026-03-18
 
 ### Added
