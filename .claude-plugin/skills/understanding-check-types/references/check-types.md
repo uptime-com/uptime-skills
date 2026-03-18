@@ -38,8 +38,6 @@ These checks run from explicit probe locations. Specify 3–5 locations and set 
 
 ## Non-probe checks
 
-Follow the MCP tool descriptions for required parameters.
-
 | Type      | Required fields                                | Key constraints                                               | Typical interval |
 | --------- | ---------------------------------------------- | ------------------------------------------------------------- | ---------------- |
 | SSL       | `address` (hostname)                           | Monitors certificate expiry and chain. See SSL fields below   | 60–1440 min      |

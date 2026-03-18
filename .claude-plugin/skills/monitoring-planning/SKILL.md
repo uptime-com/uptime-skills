@@ -16,10 +16,6 @@ For check type parameters and constraints, see `references/check-types.md`. For 
 
 HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP. Select 3-5 probe locations, set sensitivity >= 2.
 
-### Non-probe checks
-
-SSL, Blacklist, Malware, WHOIS, RDAP. Follow the MCP tool descriptions for required parameters.
-
 ### Constrained checks
 
 **Page Speed** has unique restrictions:
