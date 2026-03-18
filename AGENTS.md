@@ -1,0 +1,134 @@
+# Agent instructions
+
+## Repository structure
+
+```
+.claude-plugin/
+├── plugin.json          # Plugin metadata (name, version, description)
+├── marketplace.json     # Marketplace registry for plugin discovery
+└── skills/
+    ├── *.md             # Skills — auto-invoked by Claude based on context
+    └── references/      # Supporting data loaded by skills (not invocable)
+.mcp.json                # MCP server configuration (Uptime.com API via OAuth)
+```
+
+- **Skills** are the core product. Each skill is a standalone markdown file
+  with YAML frontmatter (`name`, `description`) and operational knowledge.
+- **References** are data files (check type matrix, checklists, detection
+  patterns) that skills pull in via `references/` paths. References are
+  one level deep — no nesting.
+- **`.mcp.json`** connects Claude Code to the Uptime.com MCP server. The
+  `UPTIME_MCP_URL` env var overrides the default endpoint for staging/dev.
+
+## Skill authoring conventions
+
+### Frontmatter
+
+Every skill and reference file must have YAML frontmatter with:
+
+```yaml
+---
+name: kebab-case-name
+description: >-
+  Multi-line description. For skills: starts with "This skill should be used
+  when the user asks to..." followed by quoted trigger phrases. For references:
+  starts with "Reference document for..." and lists consumer skills.
+---
+```
+
+### Content guidelines
+
+- Write in natural language. Use lowercase `should`, `must`, `never` — not
+  RFC 2119 caps (MUST, SHALL).
+- Exception: use `Do NOT` for API constraints that cause validation errors
+  (e.g., "do NOT pass `locations` to auto-located checks").
+- Keep skill body under 500 lines. Move detail into reference files.
+- Use tables for structured data (parameters, field references, gap matrices).
+- Use step-numbered workflows for multi-step processes.
+- MCP tool names in backticks and `snake_case` (e.g., `list_checks`).
+- When Uptime.com marketing names differ from API/engineering names, bridge
+  them explicitly: `CloudStatus (marketed as **Third-party monitoring**)`.
+
+### Cross-references
+
+- Reference files by relative path: `` `references/check-types.md` ``
+- Reference skills by name: "see `check-management` skill"
+- Keep descriptions updated — list all consumer skills in reference frontmatter.
+
+### Trigger phrase boundaries
+
+Each skill owns a clear intent boundary. When triggers could overlap, add a
+disambiguation line in the description:
+
+```yaml
+description: >-
+  ...Covers initial check creation... For modifying existing checks, see
+  check-management.
+```
+
+## Terminology
+
+Prefer API/engineering names throughout skills. Bridge marketing names on
+first mention only.
+
+| Marketing name         | Engineering name           | Notes                        |
+|------------------------|----------------------------|------------------------------|
+| Third-party monitoring | CloudStatus                | Status page feed monitoring  |
+| Synthetic Monitoring   | Transaction + API checks   | Umbrella marketing term      |
+| Real User Monitoring   | RUM check                  | JavaScript snippet-based     |
+| Heartbeat monitoring   | Custom check               | Push-based, not probe-based  |
+| Domain Health          | Blacklist + Malware checks | DNS blacklist + malware scan |
+
+## Adding a new skill
+
+1. Create `.claude-plugin/skills/<skill-name>.md` with frontmatter.
+2. Ensure trigger phrases don't overlap with existing skills.
+3. Follow the step-numbered workflow pattern used by other skills.
+4. If the skill needs reference data, add it to `references/` and list the
+   new skill in the reference's description.
+5. Add the skill to the README table with trigger examples.
+
+## Adding a new reference
+
+1. Create `.claude-plugin/skills/references/<reference-name>.md`.
+2. List all consumer skills in the frontmatter description.
+3. Keep it under 500 lines. Use a table of contents if over 100 lines.
+
+## Release process
+
+### When to release
+
+Tag a new version when a meaningful set of skill changes lands on `main` —
+new skills, updated reference materials, or corrected workflows.
+
+### Steps
+
+1. **Decide the version bump** using [EffVer](https://effver.org) — version
+   by the effort required from users to adopt the change:
+    - **micro** (0.0.x): no effort — typo fixes, wording improvements, minor corrections
+    - **meso** (0.x.0): small effort — new skills, new references, changed trigger phrases, major skill rewrites
+    - **macro** (x.0.0): significant effort — renamed/removed skills, restructured references, changed plugin name
+
+2. **Update the version** in `.claude-plugin/plugin.json`.
+
+3. **Update CHANGELOG.md** — prepend a new entry following Keep a Changelog format:
+   ```markdown
+   ## [X.Y.Z] - YYYY-MM-DD
+
+   ### Added / Changed / Fixed / Removed
+   - Description of change
+   ```
+   Write entries from the user's perspective, not implementation details.
+   Bad: "Updated check-types.md line 49"
+   Good: "Added marketing name bridges for Synthetic Monitoring and Domain Health"
+
+4. **Commit** with message: `Release vX.Y.Z`
+
+5. **Tag and push**:
+   ```bash
+   git tag vX.Y.Z
+   git push origin main --tags
+   ```
+
+6. **Create a GitHub Release** from the tag using `gh release create vX.Y.Z`
+   with the CHANGELOG entry as the body.
