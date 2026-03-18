@@ -55,24 +55,16 @@ Connects Claude Code to the [Uptime.com MCP server](https://support.uptime.com/h
 
 Skills are auto-invoked by Claude based on conversation context.
 
-| Skill                      | Triggered by                                                      |
-| -------------------------- | ----------------------------------------------------------------- |
-| **monitoring-setup**       | "set up monitoring", "add smoke test", "create transaction check" |
-| **check-management**       | "update check", "edit transaction script"                         |
-| **incident-triage**        | "site is down", "investigate outage"                              |
-| **monitoring-audit**       | "audit monitoring", "review check coverage"                       |
-| **dashboard-management**   | "create dashboard", "add widgets"                                 |
-| **status-page-management** | "set up status page", "add components"                            |
-
-### Reference materials
-
-Supporting context automatically loaded by skills:
-
-- **check-types** — check type matrix with capabilities and use cases
-- **scripting-txn** — Transaction Check step types, selectors, variables, and validations
-- **scripting-api** — API Check request steps, selectors, variables, and assertions
-- **checklist-domain-monitoring** — standard monitoring patterns per domain
-- **upstream-dependencies** — detecting and monitoring third-party dependencies
+| Skill                         | Triggered by                                       |
+| ----------------------------- | -------------------------------------------------- |
+| **monitoring-planning**       | "set up monitoring", "plan checks for domain"      |
+| **understanding-check-types** | "what check types", "how does HTTP check work"     |
+| **transaction-scripting**     | "create transaction check", "add smoke test"       |
+| **api-scripting**             | "create API check", "API monitoring script"        |
+| **monitoring-optimization**   | "audit monitoring", "optimize checks", "fill gaps" |
+| **incident-triage**           | "site is down", "investigate outage"               |
+| **dashboard-management**      | "create dashboard", "add widgets"                  |
+| **status-page-management**    | "set up status page", "add components"             |
 
 ## Prerequisites
 
