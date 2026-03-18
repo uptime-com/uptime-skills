@@ -109,9 +109,7 @@ new skills, updated reference materials, or corrected workflows.
     - **meso** (0.x.0): small effort — new skills, new references, changed trigger phrases, major skill rewrites
     - **macro** (x.0.0): significant effort — renamed/removed skills, restructured references, changed plugin name
 
-2. **Update the version** in `.claude-plugin/plugin.json`.
-
-3. **Update CHANGELOG.md** — prepend a new entry following Keep a Changelog format:
+2. **Update CHANGELOG.md** — prepend a new entry following Keep a Changelog format:
    ```markdown
    ## [X.Y.Z] - YYYY-MM-DD
 
@@ -122,13 +120,13 @@ new skills, updated reference materials, or corrected workflows.
    Bad: "Updated check-types.md line 49"
    Good: "Added marketing name bridges for Synthetic Monitoring and Domain Health"
 
-4. **Commit** with message: `Release vX.Y.Z`
+3. **Commit** with message: `Release vX.Y.Z`
 
-5. **Tag and push**:
+4. **Tag and push**:
    ```bash
    git tag vX.Y.Z
    git push origin main --tags
    ```
 
-6. **Create a GitHub Release** from the tag using `gh release create vX.Y.Z`
+5. **Create a GitHub Release** from the tag using `gh release create vX.Y.Z`
    with the CHANGELOG entry as the body.
