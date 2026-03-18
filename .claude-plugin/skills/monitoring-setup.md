@@ -1,38 +1,24 @@
 ---
 name: monitoring-setup
 description: >-
-  This skill should be used when the user asks to "set up monitoring",
-  "create checks for a domain", "monitor a website", "set up uptime checks",
-  "add monitoring for <domain>", "create a transaction check", "add a smoke
-  test", "synthetic monitoring", "create an API check", or mentions
-  comprehensive monitoring coverage. Covers initial check creation, constraint
-  awareness, and end-to-end setup including dashboards and status pages. For
-  modifying existing checks, see check-management.
+  This skill should be used when the user asks to "set up monitoring", "create checks for a domain", "monitor a website", "set up uptime checks", "add monitoring for <domain>", "create a transaction check", "add a smoke test", "synthetic monitoring", "create an API check", or mentions comprehensive monitoring coverage. Covers initial check creation, constraint awareness, and end-to-end setup including dashboards and status pages. For modifying existing checks, see check-management.
 ---
 
 # Monitoring setup — operational knowledge
 
-Practical constraints and workflow patterns for creating monitoring checks.
-This complements the MCP server instructions (which cover check types and location strategy)
-with operational knowledge discovered during real monitoring setups.
+Practical constraints and workflow patterns for creating monitoring checks. This complements the MCP server instructions (which cover check types and location strategy) with operational knowledge discovered during real monitoring setups.
 
-For the full check type matrix with parameters and constraints, see
-`references/check-types.md`. For domain-specific checklists, see
-`references/checklist-domain-monitoring.md`. For Transaction check scripting,
-see `references/scripting-txn.md`. For API check scripting, see
-`references/scripting-api.md`.
+For the full check type matrix with parameters and constraints, see `references/check-types.md`. For domain-specific checklists, see `references/checklist-domain-monitoring.md`. For Transaction check scripting, see `references/scripting-txn.md`. For API check scripting, see `references/scripting-api.md`.
 
 ## Quick reference: check categories
 
 ### Location-based checks (require explicit locations)
 
-HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP — select 3–5 probe locations,
-set sensitivity ≥ 2.
+HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP — select 3–5 probe locations, set sensitivity ≥ 2.
 
 ### Auto-located checks (locations assigned by server)
 
-SSL, Blacklist, Malware, WHOIS, RDAP — do NOT pass locations. The server assigns them
-automatically. Passing locations will cause a validation error.
+SSL, Blacklist, Malware, WHOIS, RDAP — do NOT pass locations. The server assigns them automatically. Passing locations will cause a validation error.
 
 ### Constrained checks
 
@@ -56,9 +42,7 @@ Complete monitoring setup for a domain follows these phases:
 
 All checks within a batch are independent and can be created in a single parallel tool call.
 
-5. **Group check** — after individual checks exist, create a Group check for the domain.
-   Use tag-based auto-selection with the domain tag (e.g. `example.com`) so future
-   checks are automatically included. Configure alert conditions (e.g. "any member down").
+5. **Group check** — after individual checks exist, create a Group check for the domain. Use tag-based auto-selection with the domain tag (e.g. `example.com`) so future checks are automatically included. Configure alert conditions (e.g. "any member down").
 
 ### Phase 2 — Create dashboard
 
@@ -75,53 +59,46 @@ If the monitored domain is a public-facing service, suggest creating a status pa
 - Map checks to status page components (e.g. HTTP check → "Website", DNS → "DNS", etc.)
 - See `status-page-management` skill for the full workflow.
 
-Do not create a status page automatically — it's a public-facing asset that requires
-user confirmation.
+Do not create a status page automatically — it's a public-facing asset that requires user confirmation.
 
 ### Phase 4 — Upstream dependency monitoring
 
-After the core checks are in place, detect and offer to monitor upstream dependencies.
-See `references/upstream-dependencies.md` for the full detection and monitoring reference.
+After the core checks are in place, detect and offer to monitor upstream dependencies. See `references/upstream-dependencies.md` for the full detection and monitoring reference.
 
 #### Detection
 
 Identify dependencies using available signals:
 
-1. **DNS inference** — inspect CNAME chains, MX, NS, and SPF records from checks
-   created in Phase 1. These reveal CDN, email, and DNS providers without user input.
-2. **Ask the user** — present detected providers and prompt for additional dependencies
-   (payment processors, auth providers, cloud platform, CI/CD, etc.).
+1. **DNS inference** — inspect CNAME chains, MX, NS, and SPF records from checks created in Phase 1. These reveal CDN, email, and DNS providers without user input.
+2. **Ask the user** — present detected providers and prompt for additional dependencies (payment processors, auth providers, cloud platform, CI/CD, etc.).
 
 #### User confirmation
 
 Always confirm before creating dependency checks:
 
 > I detected these upstream dependencies from your DNS records:
+>
 > - **CDN**: Cloudflare (CNAME → cdn.cloudflare.net)
 > - **Email**: Google Workspace (MX → google.com)
 > - **DNS**: Cloudflare (NS → cloudflare.com)
 >
-> Would you like me to monitor their status pages? Are there other
-> dependencies I should include (e.g. payment processor, auth provider)?
+> Would you like me to monitor their status pages? Are there other dependencies I should include (e.g. payment processor, auth provider)?
 
 #### Monitoring setup
 
 For each confirmed dependency:
 
-1. **Create CloudStatus check** — use the MCP server's tools to discover available
-   providers and service components, then create a CloudStatus check. Uptime.com
-   natively parses status feeds with proper UP/DOWN/MAINTENANCE mapping.
+1. **Create CloudStatus check** — use the MCP server's tools to discover available providers and service components, then create a CloudStatus check. Uptime.com natively parses status feeds with proper UP/DOWN/MAINTENANCE mapping.
 2. **Tag** with `upstream-dependencies` to keep them organized separately.
 
-Add dependency checks to the domain's dashboard in a separate "Dependencies"
-widget group.
+Add dependency checks to the domain's dashboard in a separate "Dependencies" widget group.
 
 ## DNS layering
 
 For comprehensive DNS coverage, create three checks:
 
 | Record | Target                             | Catches                             |
-|--------|------------------------------------|-------------------------------------|
+| ------ | ---------------------------------- | ----------------------------------- |
 | A      | subdomain (e.g. `www.example.com`) | resolution failures for the service |
 | MX     | parent domain (e.g. `example.com`) | mail routing breakage               |
 | NS     | parent domain (e.g. `example.com`) | nameserver delegation issues        |
@@ -131,14 +108,13 @@ NS breakage cascades into A and MX failures, so it provides the earliest signal.
 ## Domain vs subdomain rules
 
 | Check type                          | Target                     | Why                                                                |
-|-------------------------------------|----------------------------|--------------------------------------------------------------------|
+| ----------------------------------- | -------------------------- | ------------------------------------------------------------------ |
 | HTTP, ICMP, SSL, Blacklist, Malware | subdomain or full URL      | checks the actual service endpoint                                 |
 | DNS A/AAAA/CNAME                    | subdomain                  | resolves the specific host                                         |
 | DNS MX/NS                           | parent (registered) domain | MX and NS are zone-level records                                   |
 | WHOIS, RDAP                         | parent (registered) domain | WHOIS/RDAP data exists only for registered domains, not subdomains |
 
-WHOIS and RDAP both require `expect_string` — set it to the domain name being monitored
-(e.g. `example.com`). Creating both provides redundancy since WHOIS servers can be unreliable.
+WHOIS and RDAP both require `expect_string` — set it to the domain name being monitored (e.g. `example.com`). Creating both provides redundancy since WHOIS servers can be unreliable.
 
 ## Common pitfalls
 

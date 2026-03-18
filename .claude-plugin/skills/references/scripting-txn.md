@@ -1,16 +1,12 @@
 ---
 name: scripting-txn
 description: >-
-  Reference for Transaction Check scripting: step types, selectors, variables,
-  validations, and pagespeed integration. Used by monitoring-setup and
-  check-management skills.
+  Reference for Transaction Check scripting: step types, selectors, variables, validations, and pagespeed integration. Used by monitoring-setup and check-management skills.
 ---
 
 # Transaction Check scripting reference
 
-Transaction checks monitor web user flows by executing sequential steps in a
-real Chromium browser. Each step is a command (action) or validation (assertion).
-If any step fails, execution stops and an alert is raised.
+Transaction checks monitor web user flows by executing sequential steps in a real Chromium browser. Each step is a command (action) or validation (assertion). If any step fails, execution stops and an alert is raised.
 
 ## Table of contents
 
@@ -25,8 +21,7 @@ If any step fails, execution stops and an alert is raised.
 
 ## Step structure
 
-Each step is a JSON object. A transaction script is an array of steps executed
-in order.
+Each step is a JSON object. A transaction script is an array of steps executed in order.
 
 ```json
 {
@@ -40,11 +35,10 @@ in order.
 
 ## Selectors
 
-Steps targeting DOM elements accept an `element` parameter. Formats are tried
-in this order:
+Steps targeting DOM elements accept an `element` parameter. Formats are tried in this order:
 
 | Format       | Example                          | Description                                    |
-|--------------|----------------------------------|------------------------------------------------|
+| ------------ | -------------------------------- | ---------------------------------------------- |
 | Shadow DOM   | `div.outer#shadow-root.inner`    | Navigates shadow boundaries via `#shadow-root` |
 | XPath        | `//*[@id='main']/form/input[1]`  | Detected by leading `/`                        |
 | CSS          | `div.container > input#username` | Standard CSS selectors                         |
@@ -55,14 +49,12 @@ Selectors resolve across all frames (main page + iframes) automatically.
 
 ## Variables
 
-Capture dynamic values during execution and reuse in later steps via
-`$VARIABLE_NAME$` syntax. Names are case-insensitive, stored uppercase,
-alphanumeric + underscore only.
+Capture dynamic values during execution and reuse in later steps via `$VARIABLE_NAME$` syntax. Names are case-insensitive, stored uppercase, alphanumeric + underscore only.
 
 ### `C_SET_VARIABLE` — define a variable
 
 | Parameter  | Required | Description             |
-|------------|----------|-------------------------|
+| ---------- | -------- | ----------------------- |
 | `name`     | Yes      | Variable name           |
 | `type`     | Yes      | Source type (see below) |
 | `options`  | Depends  | Primary option          |
@@ -71,7 +63,7 @@ alphanumeric + underscore only.
 **Variable types:**
 
 | Type      | `options`                                      | `options2`        | Result                          |
-|-----------|------------------------------------------------|-------------------|---------------------------------|
+| --------- | ---------------------------------------------- | ----------------- | ------------------------------- |
 | `element` | CSS selector                                   | —                 | Text content of matched element |
 | `attr`    | CSS selector                                   | Attribute name    | Value of HTML attribute         |
 | `date`    | Format string (e.g. `YYYY-MM-DD`)              | Offset in seconds | Formatted UTC date/time         |
@@ -83,7 +75,7 @@ alphanumeric + underscore only.
 When `totp_secret` is set in `C_AUTH_AND_SETTINGS`, these become available:
 
 | Variable         | Description                   |
-|------------------|-------------------------------|
+| ---------------- | ----------------------------- |
 | `$TOTP_TOKEN$`   | Full OTP code (e.g. `123456`) |
 | `$TOTP_TOKEN_N$` | Nth digit of the OTP code     |
 
@@ -96,7 +88,7 @@ The system waits for a fresh token if fewer than 2 seconds of validity remain.
 #### `C_OPEN_URL`
 
 | Parameter         | Required | Description                                                          |
-|-------------------|----------|----------------------------------------------------------------------|
+| ----------------- | -------- | -------------------------------------------------------------------- |
 | `url`             | Yes      | URL to navigate to. Supports `$VARIABLE$`                            |
 | `wait_until`      | No       | `load` (default), `domcontentloaded`, `networkidle0`, `networkidle2` |
 | `timeout`         | No       | Seconds. Default: 30                                                 |
@@ -105,7 +97,7 @@ The system waits for a fresh token if fewer than 2 seconds of validity remain.
 ### Interaction
 
 | Step              | Purpose                              | Key parameters                                                            |
-|-------------------|--------------------------------------|---------------------------------------------------------------------------|
+| ----------------- | ------------------------------------ | ------------------------------------------------------------------------- |
 | `C_MOUSE_CLICK`   | Click element (realistic)            | `element`, `button` (left/middle/right), `click_count`, `skip_navigation` |
 | `C_CLICK_ELEMENT` | Click element (JS-level, deprecated) | `element`                                                                 |
 | `C_HOVER_ELEMENT` | Hover over element                   | `element`                                                                 |
@@ -118,7 +110,7 @@ The system waits for a fresh token if fewer than 2 seconds of validity remain.
 ### Wait
 
 | Step                          | Purpose                          | Key parameters                           |
-|-------------------------------|----------------------------------|------------------------------------------|
+| ----------------------------- | -------------------------------- | ---------------------------------------- |
 | `C_WAIT_FOR_ELEMENT`          | Wait for element to appear       | `element`, `timeout` (default 25s)       |
 | `C_WAIT_FOR_NOT_ELEMENT`      | Wait for element to disappear    | `element`, `timeout`                     |
 | `C_WAIT_FOR_ELEMENT_TEXT`     | Wait for element to contain text | `element`, `text`, `is_regex`, `timeout` |
@@ -132,7 +124,7 @@ Validations assert conditions. Failure stops execution immediately.
 ### HTTP/Network
 
 | Step                                  | Validates                         |
-|---------------------------------------|-----------------------------------|
+| ------------------------------------- | --------------------------------- |
 | `V_HTTP_STATUS_CODE_IS`               | Status code matches `http_status` |
 | `V_HTTP_HEADER_CONTAINS_TEXT`         | Header `header` contains `text`   |
 | `V_HTTP_HEADER_DOES_NOT_CONTAIN_TEXT` | Header does not contain `text`    |
@@ -140,7 +132,7 @@ Validations assert conditions. Failure stops execution immediately.
 ### URL and title
 
 | Step                       | Validates                           |
-|----------------------------|-------------------------------------|
+| -------------------------- | ----------------------------------- |
 | `V_URL_CONTAINS`           | Current URL contains `text`         |
 | `V_URL_DOES_NOT_CONTAIN`   | Current URL does not contain `text` |
 | `V_TITLE_CONTAINS`         | Page title contains `text`          |
@@ -151,7 +143,7 @@ All support `is_regex` (boolean) and `$VARIABLE$` interpolation in `text`.
 ### Element
 
 | Step                              | Validates                                       |
-|-----------------------------------|-------------------------------------------------|
+| --------------------------------- | ----------------------------------------------- |
 | `V_ELEMENT_EXISTS`                | Element exists                                  |
 | `V_ELEMENT_DOES_NOT_EXIST`        | Element does not exist                          |
 | `V_ELEMENT_CONTAINS_TEXT`         | Element text contains `text` (case-insensitive) |
@@ -159,23 +151,20 @@ All support `is_regex` (boolean) and `$VARIABLE$` interpolation in `text`.
 | `V_BOX_IS_CHECKED`                | Checkbox/radio is checked                       |
 | `V_BOX_IS_NOT_CHECKED`            | Checkbox/radio is not checked                   |
 
-For `<select>`: checks selected option value and text.
-For `<input>`: checks value and textContent.
+For `<select>`: checks selected option value and text. For `<input>`: checks value and textContent.
 
 ## Pagespeed steps
 
-Integrate Google Lighthouse for performance measurement. Only **one pagespeed
-action** per transaction check.
+Integrate Google Lighthouse for performance measurement. Only **one pagespeed action** per transaction check.
 
 | Step                                                          | Purpose                                |
-|---------------------------------------------------------------|----------------------------------------|
+| ------------------------------------------------------------- | -------------------------------------- |
 | `C_PAGESPEED_NAVIGATE`                                        | Navigate to `url` and capture metrics  |
 | `C_PAGESPEED_SNAPSHOT`                                        | Capture metrics of current page state  |
 | `C_PAGESPEED_START_TIMESPAN` / `C_PAGESPEED_END_TIMESPAN`     | Measure metrics over a time period     |
 | `C_PAGESPEED_START_NAVIGATION` / `C_PAGESPEED_END_NAVIGATION` | Measure metrics for a navigation event |
 
-START/END pairs must match type. Results include Performance, Accessibility,
-Best Practices, and SEO scores.
+START/END pairs must match type. Results include Performance, Accessibility, Best Practices, and SEO scores.
 
 ## Authentication and settings
 
@@ -184,7 +173,7 @@ Best Practices, and SEO scores.
 Must be the **first step** and can only appear **once**.
 
 | Parameter               | Description                                                       |
-|-------------------------|-------------------------------------------------------------------|
+| ----------------------- | ----------------------------------------------------------------- |
 | `username` / `password` | HTTP Basic Auth credentials                                       |
 | `headers`               | Extra HTTP headers (`Key: Value`, one per line). Supports `$VAR$` |
 | `filter_urls`           | Block requests matching regex patterns (one per line)             |
@@ -195,10 +184,7 @@ Must be the **first step** and can only appear **once**.
 | `totp_digits`           | Number of TOTP digits (default: 6)                                |
 | `no_screenshots`        | Disable screenshot capture                                        |
 
-**Viewports:** Small Laptop (1366x768), Laptop (1600x900), Large Desktop
-(1920x1080), iPad Pro (1024x1366), iPad (768x1024), iPad Landscape (1024x768),
-iPhone 6/7/8 Plus (414x736), Pixel 2 (411x731), iPhone X (375x812),
-iPhone 6/7/8 (375x667), iPhone 5/SE (320x568).
+**Viewports:** Small Laptop (1366x768), Laptop (1600x900), Large Desktop (1920x1080), iPad Pro (1024x1366), iPad (768x1024), iPad Landscape (1024x768), iPhone 6/7/8 Plus (414x736), Pixel 2 (411x731), iPhone X (375x812), iPhone 6/7/8 (375x667), iPhone 5/SE (320x568).
 
 ## Execution flow
 
@@ -220,5 +206,4 @@ iPhone 6/7/8 (375x667), iPhone 5/SE (320x568).
 - Console messages captured
 - Network requests recorded for waterfall view
 
-**Exit codes:** 0 = success, 1 = general error, 2 = browser error,
-3 = global timeout, 4 = step failure.
+**Exit codes:** 0 = success, 1 = general error, 2 = browser error, 3 = global timeout, 4 = step failure.

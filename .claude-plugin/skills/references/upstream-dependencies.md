@@ -1,9 +1,7 @@
 ---
 name: upstream-dependencies
 description: >-
-  Reference for detecting upstream service dependencies via DNS and known
-  provider patterns. Used by monitoring-setup, monitoring-audit, and
-  incident-triage skills.
+  Reference for detecting upstream service dependencies via DNS and known provider patterns. Used by monitoring-setup, monitoring-audit, and incident-triage skills.
 ---
 
 # Upstream dependency detection and monitoring
@@ -15,7 +13,7 @@ description: >-
 DNS records reveal infrastructure providers without any user input:
 
 | Record type | What to look for                            | Reveals                 |
-|-------------|---------------------------------------------|-------------------------|
+| ----------- | ------------------------------------------- | ----------------------- |
 | CNAME chain | `*.cloudfront.net`                          | AWS CloudFront CDN      |
 | CNAME chain | `*.cdn.cloudflare.net`                      | Cloudflare CDN          |
 | CNAME chain | `*.fastly.net`                              | Fastly CDN              |
@@ -38,16 +36,14 @@ DNS records reveal infrastructure providers without any user input:
 | TXT (SPF)   | `include:amazonses.com`                     | AWS SES                 |
 | TXT (SPF)   | `include:mailgun.org`                       | Mailgun                 |
 
-To perform DNS inference: create DNS checks during Phase 1, then inspect
-the returned records for provider signatures before proceeding to dependency
-monitoring.
+To perform DNS inference: create DNS checks during Phase 1, then inspect the returned records for provider signatures before proceeding to dependency monitoring.
 
 ### 2. Ask the user
 
 Prompt with common dependency categories:
 
-> I've set up monitoring for your domain. Would you also like to monitor
-> upstream dependencies? Common ones include:
+> I've set up monitoring for your domain. Would you also like to monitor upstream dependencies? Common ones include:
+>
 > - **CDN**: Cloudflare, CloudFront, Fastly, Akamai
 > - **DNS provider**: Cloudflare, Route 53, Google Cloud DNS
 > - **Email provider**: Google Workspace, Microsoft 365, SendGrid
@@ -61,9 +57,7 @@ Prompt with common dependency categories:
 
 ### 3. Existing check analysis (audit only)
 
-During monitoring audits, scan existing check addresses for known third-party
-domains. If checks target `api.stripe.com` or `auth0.com`, those are
-dependencies that should have CloudStatus monitoring.
+During monitoring audits, scan existing check addresses for known third-party domains. If checks target `api.stripe.com` or `auth0.com`, those are dependencies that should have CloudStatus monitoring.
 
 ## Creating dependency monitoring checks
 
@@ -76,7 +70,6 @@ Use CloudStatus checks — Uptime.com's native cloud provider status monitoring:
 
 ## Organizing dependency checks
 
-- Tag all dependency checks separately from direct service checks
-  (e.g. `upstream-dependencies` tag)
+- Tag all dependency checks separately from direct service checks (e.g. `upstream-dependencies` tag)
 - Consider a dedicated "Dependencies" dashboard grouping all upstream monitors
 - In the audit report, list dependencies as a separate section from direct checks

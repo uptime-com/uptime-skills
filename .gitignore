@@ -2,3 +2,5 @@
 !.gitignore
 !/.claude-plugin
 !/.mcp.json
+!/.prettierrc
+!/.editorconfig

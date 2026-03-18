@@ -1,35 +1,28 @@
 ---
 name: status-page-management
 description: >-
-  This skill should be used when the user asks to "create a status page",
-  "set up a status page", "add a component to status page",
-  "post an incident", "update incident status", "manage status page",
-  "public status page", or needs to create and manage public or private
-  status pages with components and incidents.
+  This skill should be used when the user asks to "create a status page", "set up a status page", "add a component to status page", "post an incident", "update incident status", "manage status page", "public status page", or needs to create and manage public or private status pages with components and incidents.
 ---
 
 # Status page management — operational knowledge
 
-Workflow patterns for creating status pages, mapping components to checks,
-and managing incidents through their lifecycle.
+Workflow patterns for creating status pages, mapping components to checks, and managing incidents through their lifecycle.
 
 ## Status page creation workflow
 
 ### Step 1 — Plan components
 
-A status page represents services as **components** that map to monitoring checks.
-Plan the component structure before creating:
+A status page represents services as **components** that map to monitoring checks. Plan the component structure before creating:
 
-| Component | Maps to | Rationale |
-|-----------|---------|-----------|
-| Website | HTTP check (main site) | User-facing web availability |
-| API | HTTP check (API endpoint) | Developer/integration availability |
-| DNS | DNS A check | Name resolution |
-| Email | SMTP check + DNS MX | Mail delivery chain |
-| CDN / Static Assets | HTTP check (CDN URL) | Asset delivery |
+| Component           | Maps to                   | Rationale                          |
+| ------------------- | ------------------------- | ---------------------------------- |
+| Website             | HTTP check (main site)    | User-facing web availability       |
+| API                 | HTTP check (API endpoint) | Developer/integration availability |
+| DNS                 | DNS A check               | Name resolution                    |
+| Email               | SMTP check + DNS MX       | Mail delivery chain                |
+| CDN / Static Assets | HTTP check (CDN URL)      | Asset delivery                     |
 
-Group related components. Users of your status page don't need to see every
-internal check — aggregate into meaningful service categories.
+Group related components. Users of your status page don't need to see every internal check — aggregate into meaningful service categories.
 
 ### Step 2 — Create status page
 
@@ -66,8 +59,7 @@ Database → TCP check (port 5432)
 
 ### Aggregated mapping (N:1)
 
-Multiple checks feed one component. Better for public-facing pages where
-users don't need internal granularity:
+Multiple checks feed one component. Better for public-facing pages where users don't need internal granularity:
 
 ```
 Website → HTTP + SSL + DNS A + Page Speed
@@ -99,8 +91,7 @@ Monitoring:
 
 ## Incident lifecycle
 
-Status page incidents communicate service disruptions to users. They follow
-a defined lifecycle:
+Status page incidents communicate service disruptions to users. They follow a defined lifecycle:
 
 ### 1. Create incident
 
@@ -115,12 +106,12 @@ When an outage is confirmed (not just a single alert):
 
 As investigation progresses, post updates:
 
-| Status | When to use |
-|--------|-------------|
+| Status          | When to use                            |
+| --------------- | -------------------------------------- |
 | `investigating` | Initial state — looking into the issue |
-| `identified` | Root cause found, working on fix |
-| `monitoring` | Fix deployed, watching for recurrence |
-| `resolved` | Incident is over, service restored |
+| `identified`    | Root cause found, working on fix       |
+| `monitoring`    | Fix deployed, watching for recurrence  |
+| `resolved`      | Incident is over, service restored     |
 
 Each update should include a message explaining what changed.
 
@@ -134,22 +125,19 @@ When the issue is confirmed fixed:
 
 ## Public vs private status pages
 
-| Aspect | Public | Private |
-|--------|--------|---------|
-| Audience | Customers, users, the internet | Internal teams, specific stakeholders |
-| Component detail | Aggregated, user-friendly names | Can be more granular/technical |
-| Incident language | Non-technical, user-impact focused | Can include technical details |
-| Creation requires | User confirmation (public-facing asset) | Less formal |
+| Aspect            | Public                                  | Private                               |
+| ----------------- | --------------------------------------- | ------------------------------------- |
+| Audience          | Customers, users, the internet          | Internal teams, specific stakeholders |
+| Component detail  | Aggregated, user-friendly names         | Can be more granular/technical        |
+| Incident language | Non-technical, user-impact focused      | Can include technical details         |
+| Creation requires | User confirmation (public-facing asset) | Less formal                           |
 
-**Always ask before creating a public status page** — it's a commitment to
-maintain and represents the organization publicly.
+**Always ask before creating a public status page** — it's a commitment to maintain and represents the organization publicly.
 
 ## Best practices
 
-- **Don't auto-create status pages**: unlike checks and dashboards, status pages
-  are public-facing. Always confirm with the user first.
+- **Don't auto-create status pages**: unlike checks and dashboards, status pages are public-facing. Always confirm with the user first.
 - **Keep components user-facing**: "Website" not "HTTP check on www.example.com"
 - **Update incidents promptly**: stale "investigating" status erodes trust
 - **Use component groups**: organize by service area, not by check type
-- **Map critical checks**: every component should have at least one monitoring
-  check backing it so component status can be automated
+- **Map critical checks**: every component should have at least one monitoring check backing it so component status can be automated

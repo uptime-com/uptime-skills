@@ -1,22 +1,19 @@
 ---
 name: checklist-domain-monitoring
 description: >-
-  Reference document mapping domain patterns (SaaS, e-commerce, API, email)
-  to recommended check types and configurations. Used by monitoring-setup
-  and monitoring-audit skills.
+  Reference document mapping domain patterns (SaaS, e-commerce, API, email) to recommended check types and configurations. Used by monitoring-setup and monitoring-audit skills.
 ---
 
 # Domain monitoring checklist
 
-Recommended check coverage by domain pattern. Use this to determine which checks
-to create for a given type of service.
+Recommended check coverage by domain pattern. Use this to determine which checks to create for a given type of service.
 
 ## Core checks (every domain)
 
 These checks should exist for virtually every monitored domain:
 
 | Check  | Priority | Why                                                        |
-|--------|----------|------------------------------------------------------------|
+| ------ | -------- | ---------------------------------------------------------- |
 | HTTP   | Critical | Confirms the service responds and returns expected content |
 | SSL    | Critical | Certificate expiry and chain validation                    |
 | DNS A  | Critical | Name resolution for the service endpoint                   |
@@ -29,7 +26,7 @@ These checks should exist for virtually every monitored domain:
 Public-facing web application with user login, dashboard, API.
 
 | Check            | Configuration notes                                                             |
-|------------------|---------------------------------------------------------------------------------|
+| ---------------- | ------------------------------------------------------------------------------- |
 | HTTP (main site) | Check homepage or health endpoint. Use `expect_string` for content verification |
 | HTTP (app/login) | Check authenticated endpoint if possible, or login page                         |
 | HTTP (API)       | Hit a lightweight API endpoint (e.g. `/health`, `/api/v1/status`)               |
@@ -46,7 +43,7 @@ Public-facing web application with user login, dashboard, API.
 Online store with payments, product catalog, checkout flow.
 
 | Check                 | Configuration notes                                                  |
-|-----------------------|----------------------------------------------------------------------|
+| --------------------- | -------------------------------------------------------------------- |
 | HTTP (storefront)     | Homepage with `expect_string` for key content                        |
 | HTTP (checkout)       | Checkout page availability (not the payment processor itself)        |
 | HTTP (API/search)     | Product search or catalog API endpoint                               |
@@ -62,7 +59,7 @@ Online store with payments, product catalog, checkout flow.
 Backend API consumed by mobile apps, integrations, or other services.
 
 | Check                  | Configuration notes                                                          |
-|------------------------|------------------------------------------------------------------------------|
+| ---------------------- | ---------------------------------------------------------------------------- |
 | HTTP (health endpoint) | `/health` or `/status` with `expect_string` for JSON response                |
 | HTTP (key endpoint)    | A representative API call that exercises the main code path                  |
 | TCP                    | API port (usually 443) — catches networking/firewall issues faster than HTTP |
@@ -76,7 +73,7 @@ Backend API consumed by mobile apps, integrations, or other services.
 Dedicated email infrastructure (MX, SMTP, IMAP/POP).
 
 | Check        | Configuration notes                                    |
-|--------------|--------------------------------------------------------|
+| ------------ | ------------------------------------------------------ |
 | SMTP         | Mail server hostname, port 25 (or 587 for submission)  |
 | IMAP         | Port 993 (TLS) or 143                                  |
 | POP          | Port 995 (TLS) or 110 — if POP is supported            |
@@ -93,7 +90,7 @@ Dedicated email infrastructure (MX, SMTP, IMAP/POP).
 When auditing existing monitoring, these patterns suggest gaps:
 
 | Symptom                                    | Likely missing                                     |
-|--------------------------------------------|----------------------------------------------------|
+| ------------------------------------------ | -------------------------------------------------- |
 | No DNS checks                              | DNS A + NS at minimum                              |
 | HTTP only, no SSL                          | SSL certificate monitoring                         |
 | No WHOIS/RDAP                              | Domain registration expiry alerting                |

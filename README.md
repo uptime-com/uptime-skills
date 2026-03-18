@@ -17,8 +17,7 @@ After installation, authenticate with the Uptime.com MCP server:
 /mcp
 ```
 
-Select the `uptime` server and follow the browser login flow. Tokens are
-stored securely and refreshed automatically.
+Select the `uptime` server and follow the browser login flow. Tokens are stored securely and refreshed automatically.
 
 ### Team installation
 
@@ -35,15 +34,7 @@ Add to your project's `.claude/settings.json`:
     "uptime@uptime-com": true
   },
   "permissions": {
-    "allow": [
-      "mcp__uptime__list_checks",
-      "mcp__uptime__list_tags",
-      "mcp__uptime__list_contacts",
-      "mcp__uptime__list_alerts",
-      "mcp__uptime__list_outages",
-      "mcp__uptime__get_check",
-      "mcp__uptime__get_status_page"
-    ]
+    "allow": ["mcp__uptime__list_checks", "mcp__uptime__list_tags", "mcp__uptime__list_contacts", "mcp__uptime__list_alerts", "mcp__uptime__list_outages", "mcp__uptime__get_check", "mcp__uptime__get_status_page"]
   }
 }
 ```
@@ -52,22 +43,20 @@ Add to your project's `.claude/settings.json`:
 
 ### MCP Server
 
-Connects Claude Code to
-the [Uptime.com MCP server](https://support.uptime.com/hc/en-us/articles/30498498498964-MCP-Model-Context-Protocol) with
-OAuth authentication.
+Connects Claude Code to the [Uptime.com MCP server](https://support.uptime.com/hc/en-us/articles/30498498498964-MCP-Model-Context-Protocol) with OAuth authentication.
 
 ### Skills
 
 Skills are auto-invoked by Claude based on conversation context.
 
-| Skill                      | Triggered by                                 |
-|----------------------------|----------------------------------------------|
+| Skill                      | Triggered by                                                      |
+| -------------------------- | ----------------------------------------------------------------- |
 | **monitoring-setup**       | "set up monitoring", "add smoke test", "create transaction check" |
-| **check-management**       | "update check", "edit transaction script"    |
-| **incident-triage**        | "site is down", "investigate outage"         |
-| **monitoring-audit**       | "audit monitoring", "review check coverage"  |
-| **dashboard-management**   | "create dashboard", "add widgets"            |
-| **status-page-management** | "set up status page", "add components"       |
+| **check-management**       | "update check", "edit transaction script"                         |
+| **incident-triage**        | "site is down", "investigate outage"                              |
+| **monitoring-audit**       | "audit monitoring", "review check coverage"                       |
+| **dashboard-management**   | "create dashboard", "add widgets"                                 |
+| **status-page-management** | "set up status page", "add components"                            |
 
 ### Reference materials
 
