@@ -1,5 +1,6 @@
 {
   "name": "uptime",
+  "version": "0.3.0",
   "description": "Set up monitoring, triage incidents, and audit SRE coverage with Uptime.com.",
   "author": {
     "name": "Uptime.com",

@@ -19,6 +19,12 @@ After installation, authenticate with the Uptime.com MCP server:
 
 Select the `uptime` server and follow the browser login flow. Tokens are stored securely and refreshed automatically.
 
+### Updating
+
+```bash
+/plugin update uptime@uptime-com
+```
+
 ### Team installation
 
 Add to your project's `.claude/settings.json`:

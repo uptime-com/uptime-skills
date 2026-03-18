@@ -98,7 +98,9 @@ Tag a new version when a meaningful set of skill changes lands on `main` — new
    - **meso** (0.x.0): small effort — new skills, new references, changed trigger phrases, major skill rewrites
    - **macro** (x.0.0): significant effort — renamed/removed skills, restructured references, changed plugin name
 
-2. **Update CHANGELOG.md** — prepend a new entry following Keep a Changelog format:
+2. **Bump the version** in `.claude-plugin/plugin.json`. This is required: Claude Code uses the version field for update detection and caching. Without a bump, users won't see changes.
+
+3. **Update CHANGELOG.md** — prepend a new entry following Keep a Changelog format:
 
    ```markdown
    ## [X.Y.Z] - YYYY-MM-DD
@@ -110,9 +112,9 @@ Tag a new version when a meaningful set of skill changes lands on `main` — new
 
    Write entries from the user's perspective, not implementation details. Bad: "Updated check-types.md line 49" Good: "Added marketing name bridges for Synthetic Monitoring and Domain Health"
 
-3. **Commit and push** with message: `Release vX.Y.Z`
+4. **Commit and push** with message: `Release vX.Y.Z`
 
-4. **Create a GitHub Release** — this creates the tag automatically. Use the current version's CHANGELOG section as the release body:
+5. **Create a GitHub Release** — this creates the tag automatically. Use the current version's CHANGELOG section as the release body:
    ```bash
    gh release create vX.Y.Z --title vX.Y.Z --notes "<paste current version's CHANGELOG section>"
    ```
