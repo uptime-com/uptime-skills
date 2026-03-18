@@ -31,6 +31,19 @@ SSL, Blacklist, Malware, WHOIS, RDAP. Do NOT pass locations. The server assigns 
 
 ## Setup workflow
 
+### Phase 0: verify notification contacts
+
+Before creating checks, ensure notification contacts exist:
+
+1. `list_contacts` to see existing contact groups.
+2. If a suitable group exists (e.g. "Default"), use it for all checks.
+3. If the user needs a dedicated contact group, `create_contact` with:
+   - **name**: descriptive (e.g. "Platform team", "On-call SRE")
+   - **email**: notification email addresses
+   - **sms**: phone numbers in E.164 format (e.g. `+15551234567`) for SMS alerts
+
+Checks without a contact group alert silently (logged but no notification sent).
+
 ### Phase 1: create tag and checks
 
 1. **Tag first**: `create_tag` (e.g. `example.com`) to group all checks.

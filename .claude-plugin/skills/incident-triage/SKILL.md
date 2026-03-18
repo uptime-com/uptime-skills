@@ -181,6 +181,23 @@ False negatives are real outages that monitoring fails to detect. These are more
 
 Frequent false negatives indicate the monitoring strategy needs a broader review. Recommend invoking the `monitoring-optimization` skill to run a full audit: gap analysis, configuration review, and upstream dependency check.
 
+## Ignoring alerts
+
+Use `ignore_alert` to exclude a confirmed false positive from outage calculations. This is important for accurate SLA reporting: ignored alerts don't count as downtime.
+
+When to ignore:
+
+- Confirmed false positive (probe issue, not real outage)
+- Alert caused by planned maintenance that wasn't covered by a maintenance window
+- One-time transient error that doesn't reflect real availability
+
+When NOT to ignore:
+
+- Real outages, even brief ones: they should be reflected in uptime stats
+- Alerts you haven't investigated yet: investigate first, ignore after
+
+Always confirm with the user before ignoring alerts, as it affects SLA metrics.
+
 ## Communicating findings
 
 1. **Summary**: how many alerts, how many active vs resolved
