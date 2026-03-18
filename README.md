@@ -11,6 +11,15 @@ Add the marketplace and install the plugin:
 /plugin install uptime@uptime-com
 ```
 
+After installation, authenticate with the Uptime.com MCP server:
+
+```bash
+/mcp
+```
+
+Select the `uptime` server and follow the browser login flow. Tokens are
+stored securely and refreshed automatically.
+
 ### Team installation
 
 Add to your project's `.claude/settings.json`:
@@ -24,6 +33,17 @@ Add to your project's `.claude/settings.json`:
   },
   "enabledPlugins": {
     "uptime@uptime-com": true
+  },
+  "permissions": {
+    "allow": [
+      "mcp__uptime__list_checks",
+      "mcp__uptime__list_tags",
+      "mcp__uptime__list_contacts",
+      "mcp__uptime__list_alerts",
+      "mcp__uptime__list_outages",
+      "mcp__uptime__get_check",
+      "mcp__uptime__get_status_page"
+    ]
   }
 }
 ```
