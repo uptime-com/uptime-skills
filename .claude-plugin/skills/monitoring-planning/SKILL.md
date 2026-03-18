@@ -16,9 +16,9 @@ For check type parameters and constraints, see `references/check-types.md`. For 
 
 HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP. Select 3-5 probe locations, set sensitivity >= 2.
 
-### Auto-located checks (locations assigned by server)
+### Non-probe checks
 
-SSL, Blacklist, Malware, WHOIS, RDAP. Do NOT pass locations. The server assigns them automatically. Passing locations will cause a validation error.
+SSL, Blacklist, Malware, WHOIS, RDAP. Follow the MCP tool descriptions for required parameters.
 
 ### Constrained checks
 
@@ -148,6 +148,5 @@ WHOIS and RDAP both require `expect_string` set to the domain name (e.g. `exampl
 - **Page Speed with multiple locations**: "Max 1 locations allowed". Use exactly one `Dedicated-*` location.
 - **Page Speed interval < 1440**: "minimum interval for this check type is 1 days". Use 1440 or higher.
 - **WHOIS/RDAP on subdomain**: will fail or return no data. Always use the registered parent domain.
-- **Passing locations to SSL/Blacklist/Malware**: validation error. Omit locations entirely.
 - **Sensitivity = 1 with many locations**: excessive false positives. Use >= 2.
 - **Missing tag on creation**: checks become ungrouped. Always create and assign the tag first.

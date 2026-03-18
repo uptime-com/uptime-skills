@@ -36,9 +36,9 @@ These checks run from explicit probe locations. Specify 3–5 locations and set 
 | TXT         | domain                             | SPF, DKIM, DMARC verification             |
 | SOA         | parent domain                      | Zone authority                            |
 
-## Auto-located checks
+## Non-probe checks
 
-These checks have locations assigned by the server. Do NOT pass `locations` — it will cause a validation error.
+Follow the MCP tool descriptions for required parameters.
 
 | Type      | Required fields                                | Key constraints                                               | Typical interval |
 | --------- | ---------------------------------------------- | ------------------------------------------------------------- | ---------------- |
