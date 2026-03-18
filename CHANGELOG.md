@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0] - 2026-03-18
+
+### Added
+
+- Transaction scripting agent: delegates to isolated context with full scripting reference preloaded
+- API scripting agent: delegates to isolated context with full scripting reference preloaded
+- Agents preload corresponding skills via `skills:` frontmatter, guaranteeing reference auto-load
+
 ## [0.4.0] - 2026-03-18
 
 ### Added
