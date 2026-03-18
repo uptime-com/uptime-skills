@@ -54,7 +54,9 @@ Skills are auto-invoked by Claude based on conversation context.
 Supporting context automatically loaded by skills:
 
 - **check-types** — check type matrix with capabilities and use cases
-- **domain-monitoring-checklist** — standard monitoring patterns per domain
+- **scripting-txn** — Transaction Check step types, selectors, variables, and validations
+- **scripting-api** — API Check request steps, selectors, variables, and assertions
+- **checklist-domain-monitoring** — standard monitoring patterns per domain
 - **upstream-dependencies** — detecting and monitoring third-party dependencies
 
 ## Prerequisites

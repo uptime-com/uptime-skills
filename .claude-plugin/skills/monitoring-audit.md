@@ -13,7 +13,7 @@ description: >-
 Workflow patterns for reviewing monitoring coverage, identifying gaps, and
 recommending improvements.
 
-For check type coverage by domain pattern, see `references/domain-monitoring-checklist.md`.
+For check type coverage by domain pattern, see `references/checklist-domain-monitoring.md`.
 
 ## Audit workflow
 
@@ -36,7 +36,7 @@ Organize checks by their target domain to see coverage per service:
 ### Step 3 — Gap analysis
 
 For each domain, compare against the recommended coverage from
-`references/domain-monitoring-checklist.md`:
+`references/checklist-domain-monitoring.md`:
 
 **Critical gaps** (should almost always exist):
 - No HTTP check → service availability not monitored

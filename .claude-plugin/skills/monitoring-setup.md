@@ -17,7 +17,7 @@ with operational knowledge discovered during real monitoring setups.
 
 For the full check type matrix with parameters and constraints, see
 `references/check-types.md`. For domain-specific checklists, see
-`references/domain-monitoring-checklist.md`.
+`references/checklist-domain-monitoring.md`.
 
 ## Quick reference: check categories
 
