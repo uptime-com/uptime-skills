@@ -62,8 +62,8 @@ Skills are auto-invoked by Claude based on conversation context.
 
 | Skill                      | Triggered by                                 |
 |----------------------------|----------------------------------------------|
-| **monitoring-setup**       | "set up monitoring", "add checks for domain" |
-| **check-management**       | "update check", "change alert contacts"      |
+| **monitoring-setup**       | "set up monitoring", "add smoke test", "create transaction check" |
+| **check-management**       | "update check", "edit transaction script"    |
 | **incident-triage**        | "site is down", "investigate outage"         |
 | **monitoring-audit**       | "audit monitoring", "review check coverage"  |
 | **dashboard-management**   | "create dashboard", "add widgets"            |

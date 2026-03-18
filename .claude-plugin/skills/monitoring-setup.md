@@ -3,10 +3,11 @@ name: monitoring-setup
 description: >-
   This skill should be used when the user asks to "set up monitoring",
   "create checks for a domain", "monitor a website", "set up uptime checks",
-  "add monitoring for <domain>", or mentions comprehensive monitoring coverage.
-  Covers initial check creation, constraint awareness, and end-to-end setup
-  including dashboards and status pages. For modifying existing checks, see
-  check-management.
+  "add monitoring for <domain>", "create a transaction check", "add a smoke
+  test", "synthetic monitoring", "create an API check", or mentions
+  comprehensive monitoring coverage. Covers initial check creation, constraint
+  awareness, and end-to-end setup including dashboards and status pages. For
+  modifying existing checks, see check-management.
 ---
 
 # Monitoring setup — operational knowledge
@@ -17,7 +18,9 @@ with operational knowledge discovered during real monitoring setups.
 
 For the full check type matrix with parameters and constraints, see
 `references/check-types.md`. For domain-specific checklists, see
-`references/checklist-domain-monitoring.md`.
+`references/checklist-domain-monitoring.md`. For Transaction check scripting,
+see `references/scripting-txn.md`. For API check scripting, see
+`references/scripting-api.md`.
 
 ## Quick reference: check categories
 

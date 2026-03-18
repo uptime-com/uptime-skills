@@ -3,15 +3,19 @@ name: check-management
 description: >-
   This skill should be used when the user asks to "update a check",
   "modify check settings", "change check interval", "change contact group",
-  "edit check configuration", "delete a check", "simulate an outage",
-  "set up a demo", "test monitoring", or needs to modify existing checks.
-  Covers update patterns, contact group management, and outage simulation.
-  For creating new checks from scratch, see monitoring-setup.
+  "edit check configuration", "edit transaction script", "edit API check
+  script", "delete a check", "simulate an outage", "set up a demo", "test
+  monitoring", or needs to modify existing checks. Covers update patterns,
+  contact group management, and outage simulation. For creating new checks
+  from scratch, see monitoring-setup.
 ---
 
 # Check management — operational knowledge
 
 Practical patterns for managing existing monitoring checks via the MCP server.
+
+For Transaction check scripting, see `references/scripting-txn.md`. For API
+check scripting, see `references/scripting-api.md`.
 
 ## Updating existing checks
 
