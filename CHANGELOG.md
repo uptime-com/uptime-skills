@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.4.0] - 2026-03-18
+
+### Added
+
+- New skills: monitoring-planning, understanding-check-types, transaction-scripting, api-scripting, monitoring-optimization, performance-reporting
+- Performance reporting skill with SLA evaluation, trend analysis, and regional breakdowns
+- False positive tuning and false negative detection guidance in incident-triage
+- Alert ignoring workflow (`ignore_alert`) in incident-triage
+- Contact creation workflow (Phase 0) in monitoring-planning
+
+### Changed
+
+- Redesigned skill set: 9 skills centered around references, zero duplication
+- Restructured to directory-per-skill pattern (SKILL.md + references/) for auto-loading
+- Merged monitoring-audit and check-management into monitoring-optimization
+- Inlined upstream dependency content into monitoring-planning and incident-triage
+
+### Removed
+
+- monitoring-setup, monitoring-audit, check-management (consolidated into new skills)
+- Shared references directory (references now live under each skill)
+- upstream-dependencies.md reference file (content inlined)
+
 ## [0.3.0] - 2026-03-18
 
 ### Added
