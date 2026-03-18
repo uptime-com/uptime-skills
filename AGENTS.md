@@ -8,16 +8,17 @@ Run `prettier --write "**/*.md"` before committing any markdown changes. All mar
 
 ```
 .claude-plugin/
-├── plugin.json          # Plugin metadata (name, version, description)
+├── plugin.json          # Plugin metadata (name, description)
 ├── marketplace.json     # Marketplace registry for plugin discovery
 └── skills/
-    ├── *.md             # Skills — auto-invoked by Claude based on context
-    └── references/      # Supporting data loaded by skills (not invocable)
+    └── <skill-name>/
+        ├── SKILL.md         # Skill file — auto-invoked by Claude based on context
+        └── references/      # Supporting data auto-loaded with the skill
 .mcp.json                # MCP server configuration (Uptime.com API via OAuth)
 ```
 
-- **Skills** are the core product. Each skill is a standalone markdown file with YAML frontmatter (`name`, `description`) and operational knowledge.
-- **References** are data files (check type matrix, checklists, detection patterns) that skills pull in via `references/` paths. References are one level deep — no nesting.
+- **Skills** are the core product. Each skill is a directory containing `SKILL.md` with YAML frontmatter (`name`, `description`) and operational knowledge.
+- **References** are data files (check type matrix, checklists, scripting guides) nested under each skill's `references/` directory. They auto-load when the skill activates. References may be duplicated across skills that share them.
 - **`.mcp.json`** connects Claude Code to the Uptime.com MCP server. The `UPTIME_MCP_URL` env var overrides the default endpoint for staging/dev.
 
 ## Skill authoring conventions
@@ -73,17 +74,17 @@ Prefer API/engineering names throughout skills. Bridge marketing names on first 
 
 ## Adding a new skill
 
-1. Create `.claude-plugin/skills/<skill-name>.md` with frontmatter.
+1. Create `.claude-plugin/skills/<skill-name>/SKILL.md` with frontmatter.
 2. Ensure trigger phrases don't overlap with existing skills.
 3. Follow the step-numbered workflow pattern used by other skills.
-4. If the skill needs reference data, add it to `references/` and list the new skill in the reference's description.
+4. If the skill needs reference data, add files to `<skill-name>/references/`. References auto-load when the skill activates.
 5. Add the skill to the README table with trigger examples.
 
 ## Adding a new reference
 
-1. Create `.claude-plugin/skills/references/<reference-name>.md`.
-2. List all consumer skills in the frontmatter description.
-3. Keep it under 500 lines. Use a table of contents if over 100 lines.
+1. Create the reference file under the consuming skill's `references/` directory.
+2. If multiple skills need the same reference, copy it to each skill's `references/`.
+3. Keep references under 500 lines. Use a table of contents if over 100 lines.
 
 ## Release process
 
