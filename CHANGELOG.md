@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0] - 2026-03-18
+
+### Changed
+
+- Inlined scripting references directly into transaction-scripting and api-scripting SKILL.md files
+- Removed separate reference files for scripting skills (content now in skill body)
+- Agents preload skills with full content, eliminating filesystem search at runtime
+
 ## [0.5.0] - 2026-03-18
 
 ### Added
