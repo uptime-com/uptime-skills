@@ -4,11 +4,29 @@ AI agent skills and context for working with [Uptime.com](https://uptime.com) mo
 
 ## Installation
 
+Add the marketplace and install the plugin:
+
 ```bash
-/plugin install uptime@claude-plugins-official
+/plugin marketplace add uptime-com/uptime-skills
+/plugin install uptime@uptime-com
 ```
 
-<!-- TODO: team installation via .claude/settings.json -->
+### Team installation
+
+Add to your project's `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "uptime-com": {
+      "source": { "source": "github", "repo": "uptime-com/uptime-skills" }
+    }
+  },
+  "enabledPlugins": {
+    "uptime@uptime-com": true
+  }
+}
+```
 
 ## What's included
 

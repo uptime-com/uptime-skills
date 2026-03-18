@@ -6,6 +6,7 @@ description: >-
   "edit check configuration", "delete a check", "simulate an outage",
   "set up a demo", "test monitoring", or needs to modify existing checks.
   Covers update patterns, contact group management, and outage simulation.
+  For creating new checks from scratch, see monitoring-setup.
 ---
 
 # Check management — operational knowledge

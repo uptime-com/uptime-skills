@@ -46,8 +46,8 @@ will cause a validation error.
 | Type      | Required fields                                | Key constraints                                               | Typical interval |
 |-----------|------------------------------------------------|---------------------------------------------------------------|------------------|
 | SSL       | `address` (hostname)                           | Monitors certificate expiry and chain. See SSL fields below   | 60–1440 min      |
-| Blacklist | `address` (hostname/IP)                        | Checks DNS blacklists (RBLs)                                  | 1440 min         |
-| Malware   | `address` (URL)                                | Scans for malware indicators                                  | 1440 min         |
+| Blacklist | `address` (hostname/IP)                        | Marketed as **Domain Health** — checks DNS blacklists (RBLs)  | 1440 min         |
+| Malware   | `address` (URL)                                | Marketed as **Domain Health** — scans for malware indicators  | 1440 min         |
 | WHOIS     | `address` (registered domain), `expect_string` | Domain only — no subdomains. Set expect_string to domain name | 1440 min         |
 | RDAP      | `address` (registered domain), `expect_string` | Domain only — no subdomains. Redundancy for WHOIS             | 1440 min         |
 
@@ -91,12 +91,15 @@ properly tagged on creation, group checks automatically include them.
 
 ## Synthetic / advanced checks
 
+Marketed as **Synthetic Monitoring** — these checks simulate user interactions
+rather than simple endpoint polling.
+
 | Type | Required fields | Key constraints | Typical interval |
 |------|----------------|-----------------|------------------|
 | Transaction | `address` (URL), script steps | Multi-step browser interaction. Default IP version differs (not IPv4) | 5–30 min |
 | API | `address` (URL), request config | Multi-step API calls with assertions. Default IP version differs | 5–30 min |
-| RUM | Site tag (JavaScript snippet) | Real User Monitoring — no probe locations, measures actual visitors | Continuous |
-| Custom (Heartbeat) | Heartbeat URL (generated) | Process pushes to Uptime.com — alerts if heartbeat stops | Configurable timeout |
+| RUM | Site tag (JavaScript snippet) | Marketed as **Real User Monitoring** — no probe locations, measures actual visitor performance | Continuous |
+| Custom (Heartbeat) | Heartbeat URL (generated) | Marketed as **Heartbeat monitoring** — process pushes to Uptime.com, alerts if heartbeat stops | Configurable timeout |
 
 **RUM-specific field**: `max_load_time` — alert if average page load exceeds this
 threshold (seconds). Only applicable to RUM checks.

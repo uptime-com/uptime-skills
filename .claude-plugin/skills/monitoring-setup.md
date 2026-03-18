@@ -2,10 +2,11 @@
 name: monitoring-setup
 description: >-
   This skill should be used when the user asks to "set up monitoring",
-  "create checks for a domain", "monitor a website", "configure uptime checks",
+  "create checks for a domain", "monitor a website", "set up uptime checks",
   "add monitoring for <domain>", or mentions comprehensive monitoring coverage.
-  Provides check creation workflow, constraint awareness, and end-to-end setup
-  including dashboards and status pages.
+  Covers initial check creation, constraint awareness, and end-to-end setup
+  including dashboards and status pages. For modifying existing checks, see
+  check-management.
 ---
 
 # Monitoring setup — operational knowledge

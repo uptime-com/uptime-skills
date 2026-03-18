@@ -53,7 +53,7 @@ For each domain, compare against the recommended coverage from
 - No Page Speed → performance regression not tracked
 - No Malware check → compromise detection missing
 - Single DNS record type → limited DNS coverage
-- No Group check → no aggregate view of domain health
+- No Group check → no aggregate view of domain health (standard for production domains)
 
 ### Step 4 — Configuration review
 

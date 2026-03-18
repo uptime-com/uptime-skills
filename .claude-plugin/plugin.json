@@ -1,7 +1,7 @@
 {
-  "name": "uptime-mcp",
+  "name": "uptime",
   "version": "0.0.0",
-  "description": "Uptime.com monitoring MCP server",
+  "description": "Set up monitoring, triage incidents, and audit SRE coverage with Uptime.com.",
   "author": {
     "name": "Uptime.com",
     "url": "https://uptime.com"

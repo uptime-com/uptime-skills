@@ -2,7 +2,8 @@
 name: upstream-dependencies
 description: >-
   Reference for detecting upstream service dependencies via DNS and known
-  provider patterns. Used by monitoring-setup and monitoring-audit skills.
+  provider patterns. Used by monitoring-setup, monitoring-audit, and
+  incident-triage skills.
 ---
 
 # Upstream dependency detection and monitoring
