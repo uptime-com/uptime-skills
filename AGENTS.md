@@ -120,13 +120,10 @@ new skills, updated reference materials, or corrected workflows.
    Bad: "Updated check-types.md line 49"
    Good: "Added marketing name bridges for Synthetic Monitoring and Domain Health"
 
-3. **Commit** with message: `Release vX.Y.Z`
+3. **Commit and push** with message: `Release vX.Y.Z`
 
-4. **Tag and push**:
+4. **Create a GitHub Release** — this creates the tag automatically.
+   Use the current version's CHANGELOG section as the release body:
    ```bash
-   git tag vX.Y.Z
-   git push origin main --tags
+   gh release create vX.Y.Z --title vX.Y.Z --notes "<paste current version's CHANGELOG section>"
    ```
-
-5. **Create a GitHub Release** from the tag using `gh release create vX.Y.Z`
-   with the CHANGELOG entry as the body.
