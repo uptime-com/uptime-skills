@@ -132,11 +132,54 @@ Before triaging, note whether alerting checks have escalation rules. If escalati
 - WHOIS/RDAP alert (registration expiry is usually weeks away)
 - Page Speed degradation (performance issue, not outage)
 
-### False positive indicators
+## False positives
 
-- Only 1 of N probe locations reports failure: likely probe issue
-- Alert fires and clears within one check interval: transient network issue
-- Output shows timeout but other check types pass: check-specific timeout
+False positives are alerts that fire when the service is actually healthy.
+
+### Indicators
+
+- Only 1 of N probe locations reports failure: likely a probe or regional network issue
+- Alert fires and clears within one check interval: transient network blip
+- Output shows timeout but other check types for the same target pass: check-specific timeout, not real downtime
+- Repeated short-lived alerts from the same location: that location may have connectivity issues
+
+### Tuning recommendations
+
+If false positives are frequent, recommend adjusting the monitoring configuration:
+
+| Problem                         | Fix                                                                  |
+| ------------------------------- | -------------------------------------------------------------------- |
+| Single-location flapping        | Increase sensitivity to >= 2 (require multiple locations to confirm) |
+| Probe location unreliable       | Replace with a different location in the same region                 |
+| Timeout-based false alerts      | Increase `timeout` value to accommodate normal latency variance      |
+| Interval too aggressive         | Increase interval for non-critical checks (e.g. 1 min -> 5 min)      |
+| All checks share same locations | Diversify locations across regions to reduce correlated false alerts |
+
+## False negatives
+
+False negatives are real outages that monitoring fails to detect. These are more dangerous than false positives because they create a false sense of security.
+
+### Indicators
+
+- Users report downtime but no alerts fired
+- Outage visible in external tools (e.g. Down Detector) but not in Uptime.com
+- Post-incident review reveals the service was down for minutes/hours without alerting
+- CloudStatus shows upstream provider incident but no corresponding alerts on dependent checks
+
+### Common causes
+
+| Cause                    | Why it happens                                                                 | Fix                                                             |
+| ------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Missing check types      | Only HTTP monitored, but DNS was the actual failure point                      | Add DNS, SSL, ICMP checks for comprehensive coverage            |
+| Wrong endpoint monitored | Health endpoint returns 200 even when the app is broken                        | Monitor a functional endpoint that exercises the real code path |
+| `expect_string` not set  | HTTP check passes on any 200 response, even error pages                        | Add `expect_string` to verify response content                  |
+| Too few locations        | All probes are in one region; regional outage goes undetected from that region | Use 3-5 locations across multiple continents                    |
+| Check is paused          | Forgotten manual pause or stale maintenance window                             | Review paused checks; convert to scheduled maintenance windows  |
+| No upstream monitoring   | Provider outage causes degradation but no check covers the dependency          | Add CloudStatus checks for critical upstream providers          |
+
+### When false negatives are frequent
+
+Frequent false negatives indicate the monitoring strategy needs a broader review. Recommend invoking the `monitoring-optimization` skill to run a full audit: gap analysis, configuration review, and upstream dependency check.
 
 ## Communicating findings
 
