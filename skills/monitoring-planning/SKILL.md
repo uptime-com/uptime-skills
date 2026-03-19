@@ -47,7 +47,7 @@ Checks without a contact group alert silently (logged but no notification sent).
 3. **Batch 2, auto-located** (all parallel): SSL, Blacklist, Malware, WHOIS, RDAP.
 4. **Batch 3, constrained** (last): Page Speed.
 
-All checks within a batch are independent and can be created in a single parallel tool call.
+All checks within a batch are independent and can be created in a single parallel tool call. Pass `tags: ["<domain-tag>"]` on every check to ensure it is tagged from creation. Untagged checks are invisible to Group checks and hard to manage at scale.
 
 5. **Group check**: after individual checks exist, create a Group check for the domain. Use tag-based auto-selection with the domain tag so future checks are automatically included.
 
