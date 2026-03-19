@@ -80,8 +80,10 @@ Reference with `$VARIABLE_NAME$` syntax in any text value.
 `C_AUTH_AND_SETTINGS` must be first if used:
 
 ```json
-{ "step_def": "C_AUTH_AND_SETTINGS", "values": { "viewport_size": "Large Desktop", "filter_urls": "analytics\\.google\\.com" } }
+{ "step_def": "C_AUTH_AND_SETTINGS", "values": { "viewport_size": "1920x1080", "filter_urls": "analytics\\.google\\.com" } }
 ```
+
+Valid `viewport_size` values: `1366x768` (default), `1600x900`, `1920x1080`, `1024x1366`, `768x1024`, `1024x768`, `414x736`, `411x731`, `375x812`, `375x667`, `320x568`. Use the dimension string, not the device name.
 
 ## Workflow
 

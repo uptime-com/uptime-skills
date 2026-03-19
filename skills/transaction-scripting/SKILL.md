@@ -173,7 +173,22 @@ Must be the **first step** and can only appear **once**.
 | `totp_digits`           | Number of TOTP digits (default: 6)                                |
 | `no_screenshots`        | Disable screenshot capture                                        |
 
-**Viewports:** Small Laptop (1366x768), Laptop (1600x900), Large Desktop (1920x1080), iPad Pro (1024x1366), iPad (768x1024), iPad Landscape (1024x768), iPhone 6/7/8 Plus (414x736), Pixel 2 (411x731), iPhone X (375x812), iPhone 6/7/8 (375x667), iPhone 5/SE (320x568).
+**`viewport_size` values** (use the dimension string, not the label):
+
+| Value             | Device             |
+| ----------------- | ------------------ |
+| `""` (empty/omit) | Default (1366x768) |
+| `1366x768`        | Small Laptop       |
+| `1600x900`        | Laptop             |
+| `1920x1080`       | Large Desktop      |
+| `1024x1366`       | iPad Pro           |
+| `768x1024`        | iPad               |
+| `1024x768`        | iPad Landscape     |
+| `414x736`         | iPhone 6/7/8 Plus  |
+| `411x731`         | Pixel 2            |
+| `375x812`         | iPhone X           |
+| `375x667`         | iPhone 6/7/8       |
+| `320x568`         | iPhone 5/SE        |
 
 ## Execution flow
 
