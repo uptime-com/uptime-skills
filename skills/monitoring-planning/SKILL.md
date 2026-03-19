@@ -40,28 +40,50 @@ Before creating checks, ensure notification contacts exist:
 
 Checks without a contact group alert silently (logged but no notification sent).
 
-### Phase 1: create tag and checks
+### Phase 1: create tag
 
-1. **Tag first**: `create_tag` (e.g. `example.com`) to group all checks.
-2. **Batch 1, location-based** (all parallel): HTTP, DNS (A/MX/NS), ICMP, TCP.
-3. **Batch 2, auto-located** (all parallel): SSL, Blacklist, Malware, WHOIS, RDAP.
-4. **Batch 3, constrained** (last): Page Speed.
+Create a tag before any checks. The tag is the primary organizational unit in Uptime.com: it drives Group check auto-selection, dashboard filtering, and SLA reporting scope.
 
-All checks within a batch are independent and can be created in a single parallel tool call. Pass `tags: ["<domain-tag>"]` on every check to ensure it is tagged from creation. Untagged checks are invisible to Group checks and hard to manage at scale.
+Tag naming conventions:
 
-5. **Group check**: after individual checks exist, create a Group check for the domain. Use tag-based auto-selection with the domain tag so future checks are automatically included.
+- Use the registered domain as the tag name (e.g. `example.com`, not `Example` or `www.example.com`)
+- For multi-environment setups, include the environment: `example.com/production`, `example.com/staging`
+- For upstream dependencies, use a dedicated tag: `upstream-dependencies`
 
-### Phase 2: create dashboard
+### Phase 2: create checks
+
+1. **Batch 1, location-based** (all parallel): HTTP, DNS (A/MX/NS), ICMP, TCP.
+2. **Batch 2, auto-located** (all parallel): SSL, Blacklist, Malware, WHOIS, RDAP.
+3. **Batch 3, constrained** (last): Page Speed.
+
+All checks within a batch are independent and can be created in a single parallel tool call.
+
+Every check must include:
+
+- `tags`: always pass the domain tag. Every check must be tagged from the moment of creation. Untagged checks are invisible to Group checks, excluded from tag-based dashboards, and hard to manage at scale.
+- `contact_groups`: at least one contact group so alerts are not silent.
+- `name`: use a consistent pattern: `<domain> <check-type>` (e.g. `example.com HTTP`, `example.com DNS A`, `realworld.show SSL`).
+- `notes`: brief description of purpose when not obvious from the name.
+
+### Phase 3: create Group check
+
+After individual checks exist, create a Group check for the domain:
+
+- Use tag-based auto-selection with the domain tag so future checks are automatically included.
+- Configure alert conditions (e.g. "any member down").
+- Tag the Group check itself with the same domain tag.
+
+### Phase 4: create dashboard
 
 1. `create_dashboard` with a descriptive name (e.g. "example.com monitoring").
 2. Add widgets for the checks created in Phase 1.
 3. Group widgets by check type or service function.
 
-### Phase 3: suggest status page (for public-facing services)
+### Phase 5: suggest status page (for public-facing services)
 
 If the domain is public-facing, suggest creating a status page. Do not create automatically; it's a public asset that requires user confirmation. See `status-page-management` skill for the full workflow.
 
-### Phase 4: upstream dependency monitoring
+### Phase 6: upstream dependency monitoring
 
 Detect and offer to monitor upstream dependencies using CloudStatus checks.
 
