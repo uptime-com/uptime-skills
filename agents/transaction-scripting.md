@@ -85,9 +85,20 @@ Reference with `$VARIABLE_NAME$` syntax in any text value.
 
 Valid `viewport_size` values: `1366x768` (default), `1600x900`, `1920x1080`, `1024x1366`, `768x1024`, `1024x768`, `414x736`, `411x731`, `375x812`, `375x667`, `320x568`. Use the dimension string, not the device name.
 
+## Known API issues
+
+Transaction check creation via `create_transaction_check` is currently experiencing location validation errors at the API level. The API rejects both regular and dedicated location identifiers.
+
+Before attempting to create a transaction check, warn the user:
+
+> **Note:** Transaction check creation is currently affected by a known API issue with location validation. The script is ready, but creation may fail. Would you like me to try anyway?
+
+Do NOT attempt creation without explicit user confirmation.
+
 ## Workflow
 
 1. Identify the user flow
 2. Build the script using ONLY the step types above
 3. Present the complete JSON to the user for review
-4. Create the check via `create_transaction_check`
+4. Warn about the known API issue and ask for confirmation
+5. If confirmed, create the check via `create_transaction_check`
