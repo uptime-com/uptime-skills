@@ -21,9 +21,11 @@ Dashboards work best when they have a clear purpose. Common patterns:
 | Service tier dashboard | All critical/production checks    | Executive or on-call view                        |
 | Check type dashboard   | All checks of one type (e.g. SSL) | Focused monitoring (certificate expiry overview) |
 
-### Step 2 — Gather checks
+### Step 2 — Check capacity and gather checks
 
-Based on the chosen scope:
+Call `get_account_usage` to check whether dashboard or widget limits apply to the account. If limits exist and are near capacity (>80%), warn the user before creating new dashboards or widgets.
+
+Gather checks based on the chosen scope:
 
 - `list_checks` with tag filter for domain/team dashboards
 - `list_checks` then filter by check type for type-specific dashboards

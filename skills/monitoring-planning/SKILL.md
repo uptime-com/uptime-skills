@@ -31,9 +31,24 @@ SSL, Blacklist, Malware, WHOIS, RDAP. Do NOT pass locations. The server assigns 
 
 ## Setup workflow
 
-### Phase 0: verify notification contacts
+### Phase 0: verify capacity and contacts
 
-Before creating checks, ensure notification contacts exist:
+Before creating checks, query account limits and verify contacts exist.
+
+#### Check account usage
+
+Call `get_account_usage` to retrieve plan limits and current consumption. The response includes total check slots, per-type limits, and current counts.
+
+- If the account has **no remaining capacity** for the planned checks, stop and tell the user. Show current usage vs. limits.
+- If adding the planned checks would use **>80% of any limit**, warn the user before proceeding. Example:
+
+> Your plan allows 50 HTTP checks and you currently have 43. Adding 5 more brings you to 96% capacity. Proceed?
+
+- If the plan does not support a specific check type (limit = 0), skip that check type and note it in the summary.
+
+Adapt the check plan to fit within available capacity. Prioritize critical checks (HTTP, SSL, DNS A) over nice-to-have checks (Page Speed, Malware) when capacity is constrained.
+
+#### Verify notification contacts
 
 1. `list_contacts` to see existing contact groups.
 2. If a suitable group exists (e.g. "Default"), use it for all checks.
