@@ -49,6 +49,32 @@ Add widgets for the checks gathered in Step 2. Widget selection depends on what 
 | Uptime percentage | SLA reporting        | Shows uptime over a time window                   |
 | Alert history     | Incident patterns    | Shows when and how often alerts fired             |
 
+### Widget configuration
+
+When adding a widget, specify:
+
+- **Check**: which monitoring check the widget displays data for
+- **Widget type**: one of the types above
+- **Time range**: the lookback window for historical data (e.g. 24h, 7d, 30d)
+
+Response time and uptime percentage widgets are most useful with longer time ranges (7d+). Check status widgets are best with short/live views.
+
+### Widget types by check type
+
+Not all widget types make sense for all check types:
+
+| Check type          | Check status | Response time | Uptime % | Alert history |
+| ------------------- | ------------ | ------------- | -------- | ------------- |
+| HTTP                | Yes          | Yes           | Yes      | Yes           |
+| DNS, ICMP, TCP, UDP | Yes          | Yes           | Yes      | Yes           |
+| SSL, WHOIS, RDAP    | Yes          | No            | Yes      | Yes           |
+| Blacklist, Malware  | Yes          | No            | No       | Yes           |
+| Page Speed          | Yes          | No            | No       | No            |
+| Group               | Yes          | No            | Yes      | Yes           |
+| Transaction, API    | Yes          | Yes           | Yes      | Yes           |
+
+SSL, WHOIS, RDAP, Blacklist, and Malware are auto-located checks with infrequent intervals, so response time widgets add no value. Page Speed produces Lighthouse scores, not uptime data.
+
 ### Recommended layouts
 
 **Domain dashboard**: group widgets by check type
@@ -79,6 +105,31 @@ Consistent dashboard names help with discovery:
 - `{team} overview` — team dashboards
 - `{purpose} dashboard` — special-purpose (e.g. "SSL expiry dashboard")
 
+## Updating existing dashboards
+
+When monitoring evolves, dashboards need to keep up.
+
+### Adding checks to a dashboard
+
+1. `get_dashboard` to see current widgets.
+2. Identify which new checks are missing.
+3. Add widgets for each new check, matching the existing layout pattern.
+
+### Rebuilding a dashboard
+
+When a dashboard has drifted significantly (many stale widgets, missing checks):
+
+1. `list_checks` with the domain tag to get the current check set.
+2. Compare against existing widgets.
+3. Remove widgets for deleted checks.
+4. Add widgets for new checks.
+5. Reorder to match the layout conventions above.
+
+### When to create a new dashboard vs update
+
+- **Update**: checks were added or removed, but the scope is the same
+- **New dashboard**: monitoring scope changed (e.g. a domain was split into multiple services, or a new team took ownership)
+
 ## Maintenance
 
 Dashboards can drift as checks are added or removed:
@@ -86,7 +137,14 @@ Dashboards can drift as checks are added or removed:
 - When creating new checks, add them to the relevant dashboard
 - When deleting checks, associated widgets may need cleanup
 - Periodically review dashboards for stale or orphaned widgets
+- When `monitoring-optimization` finds configuration issues, update widgets to reflect changes
+
+## Deleting dashboards
+
+Use `delete_dashboard` only for permanent removal. Deletion removes all widgets. If a dashboard is temporarily unneeded, consider removing widgets instead and keeping the dashboard shell for later reuse.
+
+Before deleting, confirm the dashboard isn't referenced by other team members or linked from external tools (e.g. Slack bookmarks, wiki pages).
 
 ## Linking dashboards to setup workflow
 
-When `monitoring-setup` creates checks for a new domain, Phase 2 creates a dashboard. This ensures every monitored domain has a corresponding dashboard from day one. The dashboard should include widgets for all checks created during setup.
+When `monitoring-planning` creates checks for a new domain, Phase 2 creates a dashboard. This ensures every monitored domain has a corresponding dashboard from day one. The dashboard should include widgets for all checks created during setup.

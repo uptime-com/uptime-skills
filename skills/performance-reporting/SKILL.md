@@ -85,9 +85,41 @@ Structure the report by audience:
 - Paused checks don't generate downtime data. If a check was paused during an outage, stats won't reflect the real availability.
 - Ignored alerts (via `ignore_alert`) are excluded from outage calculations and will affect uptime %.
 
-## Trend analysis
+## Downtime calculations
 
-When comparing periods (e.g. this month vs last month):
+`get_check_stats` returns downtime in seconds. Convert for readability:
+
+| Seconds    | Human-readable |
+| ---------- | -------------- |
+| < 60       | Ns             |
+| 60-3599    | Nm Ns          |
+| 3600-86399 | Nh Nm          |
+| >= 86400   | Nd Nh          |
+
+To calculate downtime minutes from uptime percentage over a period:
+
+```
+downtime_minutes = total_minutes_in_period * (1 - uptime_pct / 100)
+```
+
+For a 30-day month (43,200 minutes): 99.9% uptime = 43.2 minutes of downtime.
+
+## Multi-period comparison
+
+When comparing across periods (e.g. this month vs last month):
+
+1. Run `get_check_stats` for each period separately.
+2. Align on the same check set: exclude checks that didn't exist in both periods.
+3. Compare metrics side by side:
+
+| Metric          | Previous period | Current period | Trend  |
+| --------------- | --------------- | -------------- | ------ |
+| Uptime %        | 99.95%          | 99.87%         | Down   |
+| Avg response ms | 210             | 245            | Slower |
+| Outage count    | 2               | 5              | Worse  |
+| MTTR (min)      | 8               | 12             | Slower |
+
+### Trend assessment
 
 - **Uptime trend**: improving (higher %), stable, or degrading (lower %)
 - **Response time trend**: faster, stable, or slower (watch for gradual increases)
@@ -103,3 +135,28 @@ Use location filtering in `get_check_stats` to break down performance by region:
 - Identify regions with worse uptime or higher latency
 - Compare against probe location distribution: poor coverage in a region means less visibility
 - If a region consistently underperforms, it may indicate CDN configuration issues, DNS routing problems, or infrastructure gaps in that region
+
+## Report formatting
+
+Present reports as markdown tables for consistency. Example structure for a domain report:
+
+### Domain summary
+
+```
+| Domain       | Uptime %  | Avg Response | Outages | Downtime  |
+| ------------ | --------- | ------------ | ------- | --------- |
+| example.com  | 99.97%    | 185ms        | 1       | 12m 30s   |
+| api.acme.com | 99.99%    | 92ms         | 0       | 4m 18s    |
+```
+
+### Per-check detail (when requested)
+
+```
+| Check           | Type | Uptime % | Avg Response | P95 Response |
+| --------------- | ---- | -------- | ------------ | ------------ |
+| www.example.com | HTTP | 99.97%   | 185ms        | 420ms        |
+| example.com     | DNS  | 100.00%  | 12ms         | 28ms         |
+| example.com     | SSL  | 100.00%  | -            | -            |
+```
+
+For executive audiences, omit per-check detail and focus on the domain summary with SLA compliance status.

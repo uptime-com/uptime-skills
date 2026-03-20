@@ -1,7 +1,7 @@
 ---
 name: check-types
 description: >-
-  Reference document for check type parameters, constraints, and location requirements. Used by monitoring-setup and monitoring-audit skills.
+  Reference document for check type parameters, constraints, and location requirements. Used by monitoring-planning and monitoring-optimization skills.
 ---
 
 # Check type matrix
@@ -86,8 +86,8 @@ Marketed as **Synthetic Monitoring** — these checks simulate user interactions
 
 | Type               | Required fields                 | Key constraints                                                                                                                       | Typical interval     |
 | ------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| Transaction        | `address` (URL), script steps   | Multi-step browser interaction. See `references/scripting-txn.md` for full scripting reference. Default IP version differs (not IPv4) | 5–30 min             |
-| API                | `address` (URL), request config | Multi-step API calls with assertions. See `references/scripting-api.md` for full scripting reference. Default IP version differs      | 5–30 min             |
+| Transaction        | `address` (URL), script steps   | Multi-step browser interaction. See `transaction-scripting` skill for full scripting reference. Default IP version differs (not IPv4) | 5–30 min             |
+| API                | `address` (URL), request config | Multi-step API calls with assertions. See `api-scripting` skill for full scripting reference. Default IP version differs              | 5–30 min             |
 | RUM                | Site tag (JavaScript snippet)   | Marketed as **Real User Monitoring** — no probe locations, measures actual visitor performance                                        | Continuous           |
 | Custom (Heartbeat) | Heartbeat URL (generated)       | Marketed as **Heartbeat monitoring** — process pushes to Uptime.com, alerts if heartbeat stops                                        | Configurable timeout |
 
