@@ -8,7 +8,7 @@ description: >-
 
 End-to-end workflow for planning and creating monitoring checks for a domain.
 
-For check type parameters and constraints, see `references/check-types.md`. For domain-specific check recommendations, see `references/checklist-domain-monitoring.md`.
+For check type parameters and constraints, see `references/check-types.md`. For domain-specific check recommendations, see `references/checklist-domain-monitoring.md`. For check selection and configuration guidance, see `references/guide-check-selection.md`. For alert routing and escalation design, see `references/guide-alerting-patterns.md`.
 
 ## Quick reference: check categories
 
