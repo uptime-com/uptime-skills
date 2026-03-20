@@ -10,6 +10,16 @@ End-to-end workflow for planning and creating monitoring checks for a domain.
 
 For check type parameters and constraints, see `references/check-types.md`. For domain-specific check recommendations, see `references/checklist-domain-monitoring.md`. For check selection and configuration guidance, see `references/guide-check-selection.md`. For alert routing and escalation design, see `references/guide-alerting-patterns.md`.
 
+## Execution style
+
+Execute the workflow directly. Do not present a plan for approval or ask the user to confirm each batch of checks. The tool invocation confirmations provide sufficient user control.
+
+Only prompt the user when you need to:
+
+- Clarify a vague or ambiguous request (e.g. which subdomains to monitor)
+- Gather technical details you cannot infer (e.g. expected response content, auth requirements)
+- Confirm actions with external visibility (status pages, CloudStatus dependencies)
+
 ## Quick reference: check categories
 
 ### Location-based checks (require explicit locations)
@@ -24,6 +34,14 @@ HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP. Select 3-5 probe locations
 - Minimum interval **1440 minutes** (1 day)
 - Must use `Dedicated-*` location prefix (e.g. `Dedicated-United Kingdom-London`)
 - Standard locations will fail; only dedicated probe nodes run Lighthouse
+
+## Precondition: verify MCP tooling
+
+Before starting any workflow, confirm that Uptime.com MCP tools are available (e.g. `list_checks`, `create_http_check`, `list_contacts`). If no `uptime` MCP tools are present:
+
+1. Stop immediately. Do not proceed with domain analysis or check planning.
+2. Tell the user: "The Uptime.com MCP server is not connected. Please run `/mcp` to check the server status and authenticate."
+3. Do not attempt to look up the Uptime.com API documentation online or construct raw API payloads as a workaround.
 
 ## Setup workflow
 
