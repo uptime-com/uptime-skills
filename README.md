@@ -40,7 +40,7 @@ Add to your project's `.claude/settings.json`:
     "uptime@uptime-com": true
   },
   "permissions": {
-    "allow": ["mcp__uptime__list_checks", "mcp__uptime__list_tags", "mcp__uptime__list_contacts", "mcp__uptime__list_alerts", "mcp__uptime__list_outages", "mcp__uptime__get_check", "mcp__uptime__get_status_page"]
+    "allow": ["mcp__uptime__list_checks", "mcp__uptime__list_tags", "mcp__uptime__list_contacts", "mcp__uptime__list_alerts", "mcp__uptime__list_outages", "mcp__uptime__get_check", "mcp__uptime__get_status_page", "mcp__uptime__get_account_usage"]
   }
 }
 ```
