@@ -1,7 +1,7 @@
 ---
 name: checklist-domain-monitoring
 description: >-
-  Reference document mapping domain patterns (SaaS, e-commerce, API, email) to recommended check types and configurations. Used by monitoring-setup and monitoring-audit skills.
+  Reference document mapping domain patterns (SaaS, e-commerce, API, email) to recommended check types and configurations. Used by monitoring-planning and monitoring-optimization skills.
 ---
 
 # Domain monitoring checklist

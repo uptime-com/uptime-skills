@@ -9,12 +9,14 @@ Run `prettier --write "**/*.md"` before committing any markdown changes. All mar
 ```
 .claude-plugin/
 ├── plugin.json          # Plugin metadata (name, description)
-├── marketplace.json     # Marketplace registry for plugin discovery
-└── skills/
-    └── <skill-name>/
-        ├── SKILL.md         # Skill file — auto-invoked by Claude based on context
-        └── references/      # Supporting data auto-loaded with the skill
-.mcp.json                # MCP server configuration (Uptime.com API via OAuth)
+└── marketplace.json     # Marketplace registry for plugin discovery
+skills/
+└── <skill-name>/
+    ├── SKILL.md             # Skill file — auto-invoked by Claude based on context
+    └── references/          # Supporting data auto-loaded with the skill
+agents/
+└── <agent-name>.md          # Agent definitions with preloaded skills
+.mcp.json                    # MCP server configuration (Uptime.com API via OAuth)
 ```
 
 - **Skills** are the core product. Each skill is a directory containing `SKILL.md` with YAML frontmatter (`name`, `description`) and operational knowledge.

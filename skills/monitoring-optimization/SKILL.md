@@ -14,9 +14,12 @@ Workflow for reviewing existing monitoring, identifying gaps, optimizing configu
 
 Gather the full picture:
 
-1. `list_checks`: all checks with types, targets, and status.
-2. `list_tags`: how checks are grouped.
-3. `list_contacts`: verify notification routing exists.
+1. `get_account_usage`: plan limits and current consumption (check slots, per-type limits).
+2. `list_checks`: all checks with types, targets, and status.
+3. `list_tags`: how checks are grouped.
+4. `list_contacts`: verify notification routing exists.
+
+All four calls are independent and can run in parallel.
 
 ### Step 2: group by domain
 
@@ -77,12 +80,13 @@ For each detected dependency without a CloudStatus check, recommend adding one.
 
 Structure the audit report as:
 
-1. **Inventory summary**: N checks across M domains, K tags
-2. **Coverage by domain**: table showing which check types exist per domain
-3. **Gaps found**: prioritized list of missing checks with severity
-4. **Upstream dependencies**: detected providers, which have status monitoring
-5. **Configuration issues**: suboptimal settings that should be adjusted
-6. **Recommendations**: specific checks to create, ordered by priority
+1. **Account usage**: plan limits vs. current consumption, remaining capacity, any types at >80% utilization
+2. **Inventory summary**: N checks across M domains, K tags
+3. **Coverage by domain**: table showing which check types exist per domain
+4. **Gaps found**: prioritized list of missing checks with severity
+5. **Upstream dependencies**: detected providers, which have status monitoring
+6. **Configuration issues**: suboptimal settings that should be adjusted
+7. **Recommendations**: specific checks to create, ordered by priority (flagging any that would exceed plan limits)
 
 ## Modifying existing checks
 
