@@ -38,6 +38,12 @@ These checks run from explicit probe locations. Specify 3–5 locations and set 
 
 ## Non-probe checks
 
+These checks are **location-independent**: the thing they measure is a single global fact, not a per-vantage-point observation. Certificate expiry (SSL), domain registration (WHOIS/RDAP), blacklist status, and malware indicators return the same answer regardless of where the query runs. Location is therefore not a parameter, and these checks accept neither `locations` nor `sensitivity`. The `update_*` tools for these types do not expose those fields.
+
+Consequence: no confirmation quorum. A single-probe blip (e.g. a transient network failure reaching the target) can surface as a one-off alert. This is inherent to the check type, not a misconfiguration, and cannot be tuned away via sensitivity. If you need multi-location confirmation for connectivity, pair the check with a location-based check (e.g. a TCP 443 check alongside an SSL check) and treat the location-independent check as its specialized signal (cert expiry, blacklist status, etc.).
+
+**SSL caveat**: the check assumes one certificate for the host. Split-horizon setups (different certificates served per region) are not supported. The check reflects whichever certificate the server's query path receives.
+
 | Type      | Required fields                                | Key constraints                                               | Typical interval |
 | --------- | ---------------------------------------------- | ------------------------------------------------------------- | ---------------- |
 | SSL       | `address` (hostname)                           | Monitors certificate expiry and chain. See SSL fields below   | 60–1440 min      |
@@ -101,7 +107,7 @@ Marketed as **Synthetic Monitoring** — these checks simulate user interactions
 | `tags`                      | Array of tag names for grouping. Also drives Group check auto-selection      |
 | `contact_groups`            | Array of contact group names                                                 |
 | `interval`                  | Minutes between checks                                                       |
-| `sensitivity`               | Number of confirming locations (≥ 2 recommended for location-based)          |
+| `sensitivity`               | Number of confirming locations (≥ 2 recommended). Location-based checks only; location-independent checks (SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM) do not accept it |
 | `timeout`                   | Seconds before check times out. Detects firewalls, overloaded servers        |
 | `is_paused`                 | Create in paused state                                                       |
 | `notes`                     | Free-text notes visible in dashboard                                         |

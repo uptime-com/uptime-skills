@@ -103,8 +103,8 @@ Use `update_check` to modify check properties in place. Only specified fields ch
 | Field            | Notes                                                                             |
 | ---------------- | --------------------------------------------------------------------------------- |
 | `interval`       | Minutes between checks. Some types have minimums (e.g. Page Speed >= 1440).       |
-| `locations`      | Probe locations. Only for location-based checks; never set on auto-located types. |
-| `sensitivity`    | Number of confirming locations before alerting. Use >= 2.                         |
+| `locations`      | Probe locations. Only for location-based checks; not accepted by location-independent types (SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM). |
+| `sensitivity`    | Number of confirming locations before alerting. Use >= 2. Location-based checks only; not accepted by location-independent types (SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM), whose measured fact is global. |
 | `contact_groups` | Array of contact group names/IDs.                                                 |
 | `is_paused`      | `true` to pause, `false` to resume.                                               |
 | `tags`           | Replaces the full tag list. Include existing tags you want to keep.               |

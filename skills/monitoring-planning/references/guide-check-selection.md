@@ -161,7 +161,7 @@ Always set `expect_string` to the registered domain name (e.g., `example.com`). 
 
 ## Interval and sensitivity matrix
 
-Recommended combinations by check type and service criticality. "-" means the field does not apply (non-probe checks).
+Recommended combinations by check type and service criticality. "-" means the field does not apply: the check is location-independent (measures a global fact like cert expiry or domain registration) and accepts neither `locations` nor `sensitivity`. That set is SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM. These have no confirmation quorum, so a single-probe blip can surface as a one-off alert; pair with a location-based check for connectivity confirmation when needed.
 
 | Check type   | Critical service      | Standard service       | Low priority           |
 | ------------ | --------------------- | ---------------------- | ---------------------- |

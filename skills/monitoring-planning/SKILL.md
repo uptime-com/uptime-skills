@@ -26,6 +26,10 @@ Only prompt the user when you need to:
 
 HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP. Select 3-5 probe locations, set sensitivity >= 2.
 
+### Location-independent checks (no locations, no sensitivity)
+
+SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM. These measure a single global fact (cert expiry, domain registration, blacklist status), not a per-location observation, so the answer is the same regardless of where the query runs. Location is not a parameter; the `update_*` tools do not expose `locations` or `sensitivity`. No confirmation quorum, so a single-probe blip can surface as a one-off alert and cannot be tuned away. Inherent to the type, not a misconfiguration. For multi-location confirmation of connectivity, pair with a location-based check (e.g. TCP 443 next to an SSL check) and treat the location-independent check as its specialized signal (cert expiry, blacklist status). SSL assumes one cert per host; split-horizon SSL (per-region certs) is not supported.
+
 ### Constrained checks
 
 **Page Speed** has unique restrictions:
@@ -200,4 +204,5 @@ WHOIS and RDAP both require `expect_string` set to the domain name (e.g. `exampl
 - **Page Speed interval < 1440**: "minimum interval for this check type is 1 days". Use 1440 or higher.
 - **WHOIS/RDAP on subdomain**: will fail or return no data. Always use the registered parent domain.
 - **Sensitivity = 1 with many locations**: excessive false positives. Use >= 2.
+- **Setting `locations`/`sensitivity` on a location-independent check**: SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM do not accept these fields. Location is not meaningful (the measured fact is global), so the `update_*` tools do not expose them. Do not try to raise the confirmation count on these types; pair with a location-based check instead (e.g. TCP 443 beside SSL).
 - **Missing tag on creation**: checks become ungrouped. Always create and assign the tag first.
