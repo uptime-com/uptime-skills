@@ -5,6 +5,18 @@ Edits made directly in this repository will be overwritten on the next apply.
 Soft guideline, not hard requirement. Fill relevant sections, remove the rest,
 delete these comments.
 
+Prose volume tracks payoff, not effort. The diff ships alongside this
+description, so never re-describe it: write only what the diff cannot show.
+Length is earned by a constraint that forced the design, an approach tried and
+rejected, an ordering requirement for rollout, or a behavior change with blast
+radius. A typo fix, a dependency bump, or a rename gets a title and a line.
+Delete every section that would only restate the diff.
+
+Guidance for AI agents authoring this PR:
+- Write each section from the actual diff and commit history, not assumptions.
+- Be concrete and itemized. State observable behavior changes, not intentions.
+- Delete sections that do not apply (e.g. Deployment notes when none).
+
 PR title MUST follow Conventional Commits:
   <type>(<scope>): <short description>
   e.g. feat(scheduler): label emitted-requests counter
