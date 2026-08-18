@@ -51,8 +51,11 @@ PR title MUST follow Conventional Commits:
 ## Agent sign-off
 
 <!-- Required when an AI agent authored any part of this change. Delete the
-     section only for a change written entirely by a human. Tick only what was
-     actually verified against the diff. -->
+     section only for a change written entirely by a human. Tick a box only
+     after verifying it line by line against the final diff, not against what
+     you set out to do. If a box does not hold, fix the diff; do not silently
+     untick it or delete the section. An unfilled, deleted, or falsely ticked
+     sign-off is grounds for closing this PR without review. -->
 
 - Model: <!-- name and version, e.g. claude-opus-5 -->
 - Harness: <!-- name and version, e.g. Claude Code 2.0.31 -->
