@@ -16,6 +16,7 @@ Guidance for AI agents authoring this PR:
 - Write each section from the actual diff and commit history, not assumptions.
 - Be concrete and itemized. State observable behavior changes, not intentions.
 - Delete sections that do not apply (e.g. Deployment notes when none).
+- Fill the Agent sign-off section. It is not optional and is not deletable.
 
 PR title MUST follow Conventional Commits:
   <type>(<scope>): <short description>
@@ -46,3 +47,21 @@ PR title MUST follow Conventional Commits:
 
 <!-- Optional. Rollout impact, config/secret changes, rollback, breaking changes.
      Delete if none. -->
+
+## Agent sign-off
+
+<!-- Required when an AI agent authored any part of this change. Delete the
+     section only for a change written entirely by a human. Tick only what was
+     actually verified against the diff. -->
+
+- Model: <!-- name and version, e.g. claude-opus-5 -->
+- Harness: <!-- name and version, e.g. Claude Code 2.0.31 -->
+
+- [ ] Diff self-reviewed for antipatterns and slop: no dead or commented-out
+      code, no speculative abstraction, no copy-paste duplication, nothing
+      outside the requested scope
+- [ ] Comments self-reviewed: none restate what the code does, none narrate the
+      change event ("now uses X", "previously...", "refactored to...", "fixes
+      the bug where..."). Standing explanation lives in package and symbol
+      documentation and in tests; change-event explanation lives in this
+      description
