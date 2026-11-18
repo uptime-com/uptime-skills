@@ -2,6 +2,8 @@
 
 AI agent skills and context for working with [Uptime.com](https://uptime.com) monitoring infrastructure.
 
+[Discuss with Claude](https://claude.ai/new?q=Help%20me%20install%20the%20Uptime.com%20skills%20plugin%20for%20Claude%20Code%20and%20connect%20it%20to%20my%20Uptime.com%20account.%20Follow%20the%20instructions%20at%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-skills%23installation.%20If%20I%20use%20a%20different%20MCP%20client%2C%20use%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-mcp%23hosted-server%20instead.) · [Discuss with ChatGPT](https://chatgpt.com/?q=Help%20me%20install%20the%20Uptime.com%20skills%20plugin%20for%20Claude%20Code%20and%20connect%20it%20to%20my%20Uptime.com%20account.%20Follow%20the%20instructions%20at%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-skills%23installation.%20If%20I%20use%20a%20different%20MCP%20client%2C%20use%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-mcp%23hosted-server%20instead.) · [Discuss with Perplexity](https://www.perplexity.ai/search?q=Help%20me%20install%20the%20Uptime.com%20skills%20plugin%20for%20Claude%20Code%20and%20connect%20it%20to%20my%20Uptime.com%20account.%20Follow%20the%20instructions%20at%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-skills%23installation.%20If%20I%20use%20a%20different%20MCP%20client%2C%20use%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-mcp%23hosted-server%20instead.)
+
 ## Installation
 
 Add the marketplace and install the plugin:
