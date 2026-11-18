@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- reporting-issues skill: when a skill contradicts the MCP tools or lacks guidance, Claude drafts a GitHub issue for this repository for you to review and submit
+
 ### Changed
 
 - Skills, references and agents match the tools of Uptime.com MCP server 0.18.0: per-type `update_<type>_check` tools, `email_list`/`sms_list` on contacts, `threshold` for SSL, WHOIS and RDAP expiry warnings, `service_name` and `locations` for CloudStatus

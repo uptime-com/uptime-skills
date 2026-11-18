@@ -68,6 +68,7 @@ Skills are auto-invoked by Claude based on conversation context.
 | **incident-triage**           | "site is down", "investigate outage"                |
 | **dashboard-management**      | "create dashboard", "add checks to a dashboard"     |
 | **status-page-management**    | "set up status page", "add components"              |
+| **reporting-issues**          | a skill contradicts a tool, "report a bug"          |
 
 ### Agents
 
@@ -81,9 +82,11 @@ Skills are auto-invoked by Claude based on conversation context.
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
 - [Uptime.com](https://uptime.com) account
 
-## Contributing
+## Reporting issues
 
-<!-- TODO -->
+Report wrong or inconsistent skill guidance, and request new guidance, in this repository's [issue tracker](https://github.com/uptime-com/uptime-skills/issues). Claude drafts the report for you when a skill turns out to be wrong; you review and submit it.
+
+Faults in the MCP server itself go to the [uptime-mcp tracker](https://github.com/uptime-com/uptime-mcp/issues).
 
 ## License
 
