@@ -18,6 +18,8 @@ For the complete step type catalog, parameters, selectors, and variables, see `r
 
 The key is `step_def` (not `step_type`). All string values support `$VARIABLE$` interpolation.
 
+`create_api_check` and `update_api_check` take the array serialized as a JSON string in `script`, alongside `name`, `contact_groups`, `locations` (from `list_locations`), and optionally `interval`, `threshold` (timeout in seconds, default 30), `num_retries`, `sensitivity` and `use_ip_version` (`IPV4` or `IPV6`). There is no `address`: the URLs live in the script.
+
 ## Authentication patterns
 
 ### Bearer token flow

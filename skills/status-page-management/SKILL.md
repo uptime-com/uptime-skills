@@ -1,143 +1,89 @@
 ---
 name: status-page-management
 description: >-
-  This skill should be used when the user asks to "create a status page", "set up a status page", "add a component to status page", "post an incident", "update incident status", "manage status page", "public status page", or needs to create and manage public or private status pages with components and incidents.
+  This skill should be used when the user asks to "create a status page", "set up a status page", "add a component to status page", "post an incident", "schedule maintenance on a status page", "manage status page", "public status page", or needs to create and manage public or private status pages with components and incidents.
 ---
 
-# Status page management — operational knowledge
+# Status page management
 
-Workflow patterns for creating status pages, mapping components to checks, and managing incidents through their lifecycle.
+Workflow patterns for creating status pages, mapping components to checks, and posting incidents.
 
 ## Status page creation workflow
 
-### Step 1 — Plan components
+### Step 1: plan components
 
-A status page represents services as **components** that map to monitoring checks. Plan the component structure before creating:
+A status page represents services as **components**. A component links to at most one check through `service_id`; a **group component** (`is_group: true`) holds other components through their `group_id`. Plan the structure before creating:
 
-| Component           | Maps to                   | Rationale                          |
+| Component           | Linked check              | Rationale                          |
 | ------------------- | ------------------------- | ---------------------------------- |
 | Website             | HTTP check (main site)    | User-facing web availability       |
 | API                 | HTTP check (API endpoint) | Developer/integration availability |
 | DNS                 | DNS A check               | Name resolution                    |
-| Email               | SMTP check + DNS MX       | Mail delivery chain                |
+| Email               | SMTP check                | Mail delivery                      |
 | CDN / Static Assets | HTTP check (CDN URL)      | Asset delivery                     |
 
-Group related components. Users of your status page don't need to see every internal check — aggregate into meaningful service categories.
+Users of a status page don't need every internal check. Where several checks back one service, link the component to a Group check that aggregates them (see `monitoring-planning`), rather than to one of its members.
 
-### Step 2 — Create status page
+### Step 2: create status page
+
+Always ask before creating a public status page: it represents the organization publicly and is a commitment to maintain.
 
 `create_status_page` with:
 
-- **Name**: public-facing name (e.g. "Acme Corp Status")
-- **Subdomain or custom domain**: the URL where the page will be accessible
-- **Visibility**: public (anyone) or private (authenticated users)
+| Field                                      | Values                                                 |
+| ------------------------------------------ | ------------------------------------------------------ |
+| `name`                                     | Public-facing name (e.g. "Acme Corp Status")           |
+| `page_type`                                | `PUBLIC`, `PUBLIC_SLA`, or `INTERNAL`                  |
+| `visibility_level`                         | `PUBLIC` (anyone), `UPTIME_USERS`, or `EXTERNAL_USERS` |
+| `slug`, `cname`                            | The page's URL slug, or a custom domain pointed at it  |
+| `allow_subscriptions`                      | Lets visitors subscribe to incident notifications      |
+| `timezone`, `contact_email`, `description` | Shown on the page                                      |
 
-### Step 3 — Add components
+### Step 3: add components
 
-For each planned component:
+For each planned component, `create_status_page_component` with `status_page_id`, `name`, `description`, and `service_id` (the check id from `list_checks`). Create group components first, then pass their id as `group_id` on the members.
 
-- Create the component on the status page
-- Link it to the corresponding monitoring check(s)
-- Set the initial status (operational)
+### Step 4: verify
 
-### Step 4 — Verify
+`get_status_page` for the page settings, `list_status_page_components` for the components and their current status, and `get_status_page_component` for a component's linked check (`ServiceID`) and group.
 
-- `get_status_page` to confirm the page is configured correctly
-- Components should reflect current check states
+## Tiered components
 
-## Component mapping patterns
-
-### Simple mapping (1:1)
-
-One component per check. Works for small setups:
+Group components organize the page by service tier:
 
 ```
-Website → HTTP check
-API → HTTP check (API)
-Database → TCP check (port 5432)
+Core Services (group)
+  - Website      → HTTP check
+  - API          → HTTP check
+  - Authentication → HTTP check (login endpoint)
+
+Infrastructure (group)
+  - DNS          → DNS A check
+  - CDN          → HTTP check (CDN URL)
+  - Email        → SMTP check
 ```
 
-### Aggregated mapping (N:1)
+## Incidents
 
-Multiple checks feed one component. Better for public-facing pages where users don't need internal granularity:
+`create_status_page_incident` with `status_page_id` and `name`, plus:
 
-```
-Website → HTTP + SSL + DNS A + Page Speed
-  (component is "degraded" if any sub-check alerts)
+| Field                     | Meaning                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `incident_type`           | `INCIDENT` (default) or `SCHEDULED_MAINTENANCE`                    |
+| `description`             | The first update's text; it is posted in the `investigating` state |
+| `starts_at`, `ends_at`    | ISO 8601 (`YYYY-MM-DDThh:mm:ssZ`); `starts_at` defaults to now     |
+| `update_component_status` | Whether the incident updates component status                      |
+| `notify_subscribers`      | Whether subscribers are notified                                   |
 
-Email → SMTP + DNS MX + Blacklist
-  (component is "down" if SMTP fails, "degraded" if Blacklist alerts)
-```
+Create an incident when an outage is confirmed, not on a single alert. Write the `name` and `description` for the page's audience: user impact on a public page, technical detail on an internal one.
 
-### Tiered components
+For planned work, `SCHEDULED_MAINTENANCE` with `starts_at` and `ends_at` set in the future.
 
-Use component groups to organize by service tier:
-
-```
-Core Services:
-  - Website
-  - API
-  - Authentication
-
-Infrastructure:
-  - DNS
-  - CDN
-  - Email
-
-Monitoring:
-  - SSL Certificates
-  - Domain Registration
-```
-
-## Incident lifecycle
-
-Status page incidents communicate service disruptions to users. They follow a defined lifecycle:
-
-### 1. Create incident
-
-When an outage is confirmed (not just a single alert):
-
-- **Title**: clear, user-facing description (e.g. "Website experiencing intermittent errors")
-- **Status**: `investigating`
-- **Affected components**: set to appropriate state (`degraded_performance`, `partial_outage`, `major_outage`)
-- **Message**: what you know so far
-
-### 2. Update incident
-
-As investigation progresses, post updates:
-
-| Status          | When to use                            |
-| --------------- | -------------------------------------- |
-| `investigating` | Initial state — looking into the issue |
-| `identified`    | Root cause found, working on fix       |
-| `monitoring`    | Fix deployed, watching for recurrence  |
-| `resolved`      | Incident is over, service restored     |
-
-Each update should include a message explaining what changed.
-
-### 3. Resolve incident
-
-When the issue is confirmed fixed:
-
-- Set status to `resolved`
-- Set affected components back to `operational`
-- Include a brief summary of what happened and what was done
-
-## Public vs private status pages
-
-| Aspect            | Public                                  | Private                               |
-| ----------------- | --------------------------------------- | ------------------------------------- |
-| Audience          | Customers, users, the internet          | Internal teams, specific stakeholders |
-| Component detail  | Aggregated, user-friendly names         | Can be more granular/technical        |
-| Incident language | Non-technical, user-impact focused      | Can include technical details         |
-| Creation requires | User confirmation (public-facing asset) | Less formal                           |
-
-**Always ask before creating a public status page** — it's a commitment to maintain and represents the organization publicly.
+`update_status_page_incident` changes only `name`, `starts_at` and `ends_at`. The tools cannot post follow-up updates (identified, monitoring, resolved) or set component status; tell the user to post those in the Uptime.com web app, and offer the update text. `get_status_page_incident` shows the updates posted so far and the affected components.
 
 ## Best practices
 
-- **Don't auto-create status pages**: unlike checks and dashboards, status pages are public-facing. Always confirm with the user first.
-- **Keep components user-facing**: "Website" not "HTTP check on www.example.com"
-- **Update incidents promptly**: stale "investigating" status erodes trust
-- **Use component groups**: organize by service area, not by check type
-- **Map critical checks**: every component should have at least one monitoring check backing it so component status can be automated
+- **Confirm before creating**: unlike checks and dashboards, status pages are public-facing.
+- **Keep components user-facing**: "Website", not "HTTP check on www.example.com".
+- **Back every component with a check** through `service_id`, so its status can follow monitoring.
+- **Update incidents promptly**: a stale "investigating" erodes trust; remind the user to post updates as the investigation moves.

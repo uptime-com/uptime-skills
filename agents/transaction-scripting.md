@@ -26,20 +26,10 @@ A transaction script is a JSON array of step objects:
 
 The key is `step_def` (NOT `step_type`). Values use `element` for selectors (NOT `search_text`).
 
-## Known API issues
-
-Transaction check creation via `create_transaction_check` is currently experiencing location validation errors at the API level. The API rejects both regular and dedicated location identifiers.
-
-Before attempting to create a transaction check, warn the user:
-
-> **Note:** Transaction check creation is currently affected by a known API issue with location validation. The script is ready, but creation may fail. Would you like me to try anyway?
-
-Do NOT attempt creation without explicit user confirmation.
-
 ## Workflow
 
 1. Identify the user flow to monitor
 2. Build the script using ONLY the step types from the reference
 3. Present the monitoring plan as a numbered list explaining what each step does in plain language (do not show raw JSON to the user)
-4. Warn about the known API issue and confirm with the user before proceeding
+4. Warn about the known location problem described in the skill, and confirm with the user before proceeding
 5. If confirmed, create the check via `create_transaction_check`

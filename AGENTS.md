@@ -76,7 +76,7 @@ Prefer API/engineering names throughout skills. Bridge marketing names on first 
 
 ## Adding a new skill
 
-1. Create `.claude-plugin/skills/<skill-name>/SKILL.md` with frontmatter.
+1. Create `skills/<skill-name>/SKILL.md` with frontmatter.
 2. Ensure trigger phrases don't overlap with existing skills.
 3. Follow the step-numbered workflow pattern used by other skills.
 4. If the skill needs reference data, add files to `<skill-name>/references/`. References auto-load when the skill activates.

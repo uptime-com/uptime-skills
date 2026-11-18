@@ -25,6 +25,16 @@ A transaction script is a JSON array of step objects executed in order:
 
 The key is `step_def` (not `step_type`). Values use `element` for selectors (not `search_text`).
 
+`create_transaction_check` and `update_transaction_check` take the array serialized as a JSON string in `script`, alongside `name`, `contact_groups`, `locations`, and optionally `interval`, `threshold` (timeout in seconds, default 30), `num_retries` and `sensitivity`.
+
+## Known location problem
+
+`list_locations` returns no location that `create_transaction_check` accepts: regular locations and `EXT-TXN-Dedicated-*` locations are both rejected. Until that is fixed upstream, warn the user before attempting creation:
+
+> **Note:** Transaction check creation is currently affected by a known problem with location validation. The script is ready, but creation may fail. Would you like me to try anyway?
+
+Attempt creation only with the user's explicit confirmation. If it fails on locations, offer to hand over the script for the user to create the check in the Uptime.com web app.
+
 ## Scripting workflow
 
 1. Identify the user flow to monitor (login, checkout, signup, etc.)
@@ -33,7 +43,7 @@ The key is `step_def` (not `step_type`). Values use `element` for selectors (not
 4. Add validation steps after key transitions to catch failures early
 5. Use `C_WAIT_FOR_ELEMENT` before interacting with dynamically loaded content
 6. Present the monitoring plan as a numbered list explaining what each step does in plain language
-7. Confirm with the user before creating the check via `create_transaction_check`
+7. Warn about the known location problem and confirm with the user before creating the check via `create_transaction_check`
 
 ## Common pitfalls
 

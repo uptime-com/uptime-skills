@@ -8,7 +8,7 @@ description: >-
 
 End-to-end workflow for planning and creating monitoring checks for a domain.
 
-For check type parameters and constraints, see `references/check-types.md`. For domain-specific check recommendations, see `references/checklist-domain-monitoring.md`. For check selection and configuration guidance, see `references/guide-check-selection.md`. For alert routing and escalation design, see `references/guide-alerting-patterns.md`.
+For check type parameters, constraints, and what the MCP tools cannot set, see the `understanding-check-types` skill. For domain-specific check recommendations, see `references/checklist-domain-monitoring.md`. For check selection and configuration guidance, see `references/guide-check-selection.md`. For alert routing and escalation design, see `references/guide-alerting-patterns.md`.
 
 ## Execution style
 
@@ -26,22 +26,24 @@ Only prompt the user when you need to:
 
 HTTP, DNS, ICMP, TCP, UDP, SMTP, IMAP, POP, SSH, NTP. Select 3-5 probe locations, set sensitivity >= 2.
 
-### Location-independent checks (no locations, no sensitivity)
+### Auto-located checks (no locations, no sensitivity, no interval)
 
-SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM. These measure a single global fact (cert expiry, domain registration, blacklist status), not a per-location observation, so the answer is the same regardless of where the query runs. Location is not a parameter; the `update_*` tools do not expose `locations` or `sensitivity`. No confirmation quorum, so a single-probe blip can surface as a one-off alert and cannot be tuned away. Inherent to the type, not a misconfiguration. For multi-location confirmation of connectivity, pair with a location-based check (e.g. TCP 443 next to an SSL check) and treat the location-independent check as its specialized signal (cert expiry, blacklist status). SSL assumes one cert per host; split-horizon SSL (per-region certs) is not supported.
+SSL, Blacklist, Malware, WHOIS, RDAP. These measure a single global fact (cert expiry, domain registration, blacklist status), so the server assigns locations and the tools take no `locations`, `sensitivity` or `interval`. No confirmation quorum, so a single-probe blip can surface as a one-off alert and cannot be tuned away. Inherent to the type, not a misconfiguration. For multi-location confirmation of connectivity, pair with a location-based check (e.g. TCP 443 next to an SSL check). SSL assumes one cert per host; split-horizon SSL (per-region certs) is not supported.
+
+CloudStatus requires `locations` but takes no `sensitivity`. RUM, Heartbeat and Webhook run no probes and take no locations.
 
 ### Constrained checks
 
 **Page Speed** has unique restrictions:
 
 - Maximum **1 location** (validation error if more)
-- Minimum interval **1440 minutes** (1 day)
+- Minimum interval **1440 minutes** (1 day); the tool defaults `interval` to 5, so pass it explicitly
 - Must use `Dedicated-*` location prefix (e.g. `Dedicated-United Kingdom-London`)
 - Standard locations will fail; only dedicated probe nodes run Lighthouse
 
 ## Precondition: verify MCP tooling
 
-Before starting any workflow, confirm that Uptime.com MCP tools are available (e.g. `list_checks`, `create_http_check`, `list_contacts`). If no `uptime` MCP tools are present:
+Before starting any workflow, confirm that Uptime.com MCP tools are available (e.g. `list_checks`, `create_http_check`, `list_contacts`). If no `uptime` MCP tools are present, or they answer only with an authentication prompt:
 
 1. Stop immediately. Do not proceed with domain analysis or check planning.
 2. Tell the user: "The Uptime.com MCP server is not connected. Please run `/mcp` to check the server status and authenticate."
@@ -71,15 +73,17 @@ Adapt the check plan to fit within available capacity. Prioritize critical check
 1. `list_contacts` to see existing contact groups.
 2. If a suitable group exists (e.g. "Default"), use it for all checks.
 3. If the user needs a dedicated contact group, `create_contact` with:
-   - **name**: descriptive (e.g. "Platform team", "On-call SRE")
-   - **email**: notification email addresses
-   - **sms**: phone numbers in E.164 format (e.g. `+15551234567`) for SMS alerts
+   - `name`: descriptive (e.g. "Platform team", "On-call SRE")
+   - `email_list`: notification email addresses
+   - `sms_list`: phone numbers in E.164 format (e.g. `+15551234567`) for SMS alerts
+
+   Phone calls and integrations (Slack, PagerDuty and the like) are not settable through the MCP tools; the user adds them in the Uptime.com web app.
 
 Checks without a contact group alert silently (logged but no notification sent).
 
 ### Phase 1: create tag
 
-Create a tag before any checks. The tag is the primary organizational unit in Uptime.com: it drives Group check auto-selection, dashboard filtering, and SLA reporting scope.
+Create a tag with `create_tag` before any checks; check tools take tag names and do not create tags. The tag is the primary organizational unit in Uptime.com: it drives Group check auto-selection, dashboard filtering, and SLA reporting scope.
 
 Tag naming conventions:
 
@@ -88,6 +92,8 @@ Tag naming conventions:
 - For upstream dependencies, use a dedicated tag: `upstream-dependencies`
 
 ### Phase 2: create checks
+
+Call `list_locations` first: location-based checks take the identifiers it returns.
 
 1. **Batch 1, location-based** (all parallel): HTTP, DNS (A/MX/NS), ICMP, TCP.
 2. **Batch 2, auto-located** (all parallel): SSL, Blacklist, Malware, WHOIS, RDAP.
@@ -104,17 +110,15 @@ Every check must include:
 
 ### Phase 3: create Group check
 
-After individual checks exist, create a Group check for the domain:
+After individual checks exist, `create_group_check` for the domain:
 
-- Use tag-based auto-selection with the domain tag so future checks are automatically included.
-- Configure alert conditions (e.g. "any member down").
-- Tag the Group check itself with the same domain tag.
+- `check_tags`: the domain tag, so checks tagged later join the group automatically.
+- `down_condition`: `ANY` (any member down) or `ALL`.
+- `tags`: the same domain tag on the Group check itself.
 
 ### Phase 4: create dashboard
 
-1. `create_dashboard` with a descriptive name (e.g. "example.com monitoring").
-2. Add widgets for the checks created in Phase 1.
-3. Group widgets by check type or service function.
+`create_dashboard` with a descriptive `name` (e.g. "example.com monitoring") and `services_tags` set to the domain tag, so the dashboard picks up every check carrying it. See the `dashboard-management` skill for section settings.
 
 ### Phase 5: suggest status page (for public-facing services)
 
@@ -152,7 +156,7 @@ DNS records reveal infrastructure providers without user input:
 | TXT (SPF)   | `include:amazonses.com`                     | AWS SES                 |
 | TXT (SPF)   | `include:mailgun.org`                       | Mailgun                 |
 
-Inspect DNS check results from Phase 1 for these patterns before proceeding.
+The DNS checks report up/down, not record contents, so look the records up directly (e.g. `dig`) or ask the user, then match them against these patterns.
 
 #### User confirmation
 
@@ -170,10 +174,11 @@ Always confirm before creating dependency checks:
 
 For each confirmed dependency:
 
-1. **Create CloudStatus check**: use the MCP server's tools to discover available providers and service components. Uptime.com natively parses status feeds with proper UP/DOWN/MAINTENANCE mapping.
-2. **Tag** with `upstream-dependencies` to keep them organized separately.
+1. `list_cloudstatus_providers` for the provider name, then `search_cloudstatus_services` with `provider` (and `search`) for the exact service name.
+2. `create_cloudstatus_check` with that `service_name` and `locations`. Uptime.com parses the status feed natively with UP/DOWN/MAINTENANCE mapping.
+3. **Tag** with `upstream-dependencies` to keep them organized separately.
 
-Add dependency checks to the domain's dashboard in a separate "Dependencies" widget group.
+A separate dashboard filtered on `upstream-dependencies` keeps them out of the domain view.
 
 ## DNS layering
 
@@ -204,5 +209,5 @@ WHOIS and RDAP both require `expect_string` set to the domain name (e.g. `exampl
 - **Page Speed interval < 1440**: "minimum interval for this check type is 1 days". Use 1440 or higher.
 - **WHOIS/RDAP on subdomain**: will fail or return no data. Always use the registered parent domain.
 - **Sensitivity = 1 with many locations**: excessive false positives. Use >= 2.
-- **Setting `locations`/`sensitivity` on a location-independent check**: SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM do not accept these fields. Location is not meaningful (the measured fact is global), so the `update_*` tools do not expose them. Do not try to raise the confirmation count on these types; pair with a location-based check instead (e.g. TCP 443 beside SSL).
+- **Raising the confirmation count on an auto-located check**: SSL, Blacklist, Malware, WHOIS and RDAP take no `locations` or `sensitivity`. Pair them with a location-based check instead (e.g. TCP 443 beside SSL).
 - **Missing tag on creation**: checks become ungrouped. Always create and assign the tag first.

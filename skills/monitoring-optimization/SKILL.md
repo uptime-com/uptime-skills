@@ -15,11 +15,11 @@ Workflow for reviewing existing monitoring, identifying gaps, optimizing configu
 Gather the full picture:
 
 1. `get_account_usage`: plan limits and current consumption (check slots, per-type limits).
-2. `list_checks`: all checks with types, targets, and status.
+2. `list_checks`: every check's id, name, type and address. It pages at 25 by default; raise `page_size` or walk `page` until the header's total is covered.
 3. `list_tags`: how checks are grouped.
 4. `list_contacts`: verify notification routing exists.
 
-All four calls are independent and can run in parallel.
+All four calls are independent and can run in parallel. Configuration (status, interval, sensitivity, locations, tags, notes) comes from `get_check` per check; run those in parallel too. `list_checks` filters by `tag`, `type`, `is_paused` and `search` to narrow the set first.
 
 ### Step 2: group by domain
 
@@ -57,18 +57,16 @@ For each domain, compare against recommended coverage:
 
 Check for suboptimal configurations:
 
-| Issue                     | Detection                                       | Recommendation                                    |
-| ------------------------- | ----------------------------------------------- | ------------------------------------------------- |
-| Sensitivity = 1           | `sensitivity` field on location-based checks    | Increase to >= 2 to reduce false positives        |
-| Very long intervals       | `interval` > 10 for HTTP checks                 | Consider 1-5 min for critical services            |
-| No contact group          | Empty `contact_groups`                          | Assign a contact group or checks alert silently   |
-| No escalation rules       | Missing `escalations` on critical checks        | Add escalation so unacknowledged alerts intensify |
-| All checks same locations | Same `locations` array everywhere               | Diversify to catch regional issues                |
-| Paused checks             | `is_paused: true`                               | Verify if intentional or forgotten                |
-| No tags                   | Empty `tags`                                    | Add domain-based tags for organization            |
-| No Group check per domain | Checks exist but no aggregate                   | Create Group with tag-based auto-selection        |
-| No maintenance windows    | Critical checks with no scheduled maintenance   | Set up windows for known maintenance periods      |
-| IPv4-only on dual-stack   | `use_ip_version` = IPv4 on IPv6-capable targets | Consider `ANY` or explicit IPv6 checks            |
+| Issue                     | Detection                                           | Recommendation                             |
+| ------------------------- | --------------------------------------------------- | ------------------------------------------ |
+| Sensitivity = 1           | `Sensitivity` in `get_check` on location-based ones | Increase to >= 2 to reduce false positives |
+| Very long intervals       | `Interval` > 10 minutes on HTTP checks              | Consider 1-5 min for critical services     |
+| All checks same locations | Same `Locations` on every check                     | Diversify to catch regional issues         |
+| Paused checks             | `list_checks` with `is_paused: true`                | Verify if intentional or forgotten         |
+| No tags                   | No `Tags` line in `get_check`                       | Add domain-based tags for organization     |
+| No Group check per domain | No group-type check under the domain `tag`          | Create a Group check with `check_tags`     |
+
+`get_check` does not report contact groups, escalations or maintenance windows. Ask the user to confirm in the web app that critical checks have a contact group and escalation rules, and that known maintenance periods have windows.
 
 ### Step 5: upstream dependency audit
 
@@ -90,34 +88,34 @@ Structure the audit report as:
 
 ## Modifying existing checks
 
-Use `update_check` to modify check properties in place. Only specified fields change; omitted fields retain current values.
+Each check type has its own update tool, `update_<type>_check` (e.g. `update_http_check`, `update_dns_check`), taking the check's `id`. Only the fields provided change; omitted fields keep their values.
 
 ### Update workflow
 
-1. **Get current state**: `get_check` to see existing configuration.
-2. **Apply changes**: `update_check` with only the fields that need to change.
+1. **Get current state**: `get_check` for the existing configuration and the `Type` that picks the update tool.
+2. **Apply changes**: the type's update tool with only the fields that need to change.
 3. **Verify**: `get_check` again to confirm.
 
 ### Commonly updated fields
 
-| Field            | Notes                                                                             |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `interval`       | Minutes between checks. Some types have minimums (e.g. Page Speed >= 1440).       |
-| `locations`      | Probe locations. Only for location-based checks; not accepted by location-independent types (SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM). |
-| `sensitivity`    | Number of confirming locations before alerting. Use >= 2. Location-based checks only; not accepted by location-independent types (SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM), whose measured fact is global. |
-| `contact_groups` | Array of contact group names/IDs.                                                 |
-| `is_paused`      | `true` to pause, `false` to resume.                                               |
-| `tags`           | Replaces the full tag list. Include existing tags you want to keep.               |
+| Field            | Notes                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `interval`       | Minutes between checks. Some types have minimums (e.g. Page Speed >= 1440). Auto-located types (SSL, Blacklist, Malware, WHOIS, RDAP) take none. |
+| `locations`      | Probe location identifiers. Location-based checks, Page Speed and CloudStatus only.                                                              |
+| `sensitivity`    | Number of confirming locations before alerting. Use >= 2. Location-based and scripted checks only.                                               |
+| `contact_groups` | Contact group names.                                                                                                                             |
+| `is_paused`      | `true` to pause, `false` to resume. API, Transaction and CloudStatus checks only.                                                                |
+| `tags`           | Replaces the full tag list. Include existing tags you want to keep.                                                                              |
 
 ### Batch updates
 
-1. `list_checks` with tag filter to get the target set.
-2. Issue `update_check` calls in parallel.
+1. `list_checks` with `tag` (and `type`) to get the target set.
+2. Issue the matching `update_<type>_check` calls in parallel.
 3. Verify a sample with `get_check`.
 
 ## Maintenance windows
 
-Scheduled maintenance is preferred over manual pausing:
+Scheduled maintenance is preferred over manual pausing. Neither windows nor pausing of most check types is available through the MCP tools, so recommend them and have the user set them in the web app:
 
 - Define recurring windows (e.g. every Sunday 02:00-04:00 UTC)
 - Checks pause and resume automatically
@@ -157,7 +155,3 @@ Recommend: one tag per registered domain, optional tags for environment and team
 ## Deleting checks
 
 Use `delete_check` only for permanent removal. Deletion is irreversible; check history is lost. Prefer pausing for temporary deactivation.
-
-## Known MCP server issues
-
-- **`get_contact` type parsing**: may fail with integer/string type mismatch on the `id` parameter. Use `list_contacts` as a workaround.

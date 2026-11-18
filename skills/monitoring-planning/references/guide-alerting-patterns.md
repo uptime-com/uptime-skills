@@ -6,7 +6,7 @@ description: >-
 
 # Alerting patterns
 
-How to design notification routing so the right people learn about outages at the right time. For contact group creation steps, see the monitoring-planning skill Phase 0. For field-level reference on escalations and contact groups, see `check-types.md`.
+How to design notification routing so the right people learn about outages at the right time. For contact group creation steps, see the monitoring-planning skill Phase 0. The MCP tools set a contact group's email and SMS recipients and a check's `contact_groups`; escalations, maintenance windows, phone calls and integrations (Slack, PagerDuty and the like) are configured in the Uptime.com web app. Recommend those where they help, and tell the user where to set them.
 
 ## Alert routing principles
 
@@ -137,9 +137,9 @@ Group checks reduce noise by consolidating individual check alerts into one sign
 To implement this pattern:
 
 1. Create individual checks with `contact_groups` set to a low-priority group (or the same team, for audit trail).
-2. Create a Group check with tag-based auto-selection.
+2. Create a Group check with `check_tags` set to the domain tag.
 3. Set the Group check's `contact_groups` to the primary on-call group.
-4. Add escalation rules to the Group check, not individual checks.
+4. Have the user add escalation rules to the Group check, not individual checks, in the web app.
 
 This gives one alert per domain outage rather than one per failing check.
 
@@ -157,7 +157,6 @@ Suppress alerts during known downtime instead of manually pausing checks:
 
 - Define recurring windows (e.g., every Sunday 02:00-04:00 UTC) for scheduled maintenance.
 - Checks pause and resume automatically within the window.
-- Alerts auto-resolve when a check enters maintenance (`bulk_alert_resolution_on_pause`).
 - No risk of forgetting to resume a manually paused check.
 
 Use maintenance windows for predictable, recurring downtime. Use manual pausing only for unplanned, one-off situations.
@@ -176,7 +175,7 @@ Good notes reduce mean time to resolution by giving the responder context withou
 
 ### Group check thresholds
 
-Not every member failure is a full outage. Configure Group check alert conditions based on the service architecture:
+Not every member failure is a full outage. Choose the Group check's alert condition from the service architecture. `down_condition` takes `ANY` or `ALL`; an N-of-M threshold is set in the web app.
 
 | Architecture          | Alert condition  | Reasoning                                          |
 | --------------------- | ---------------- | -------------------------------------------------- |

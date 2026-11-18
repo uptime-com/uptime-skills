@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Skills, references and agents match the tools of Uptime.com MCP server 0.18.0: per-type `update_<type>_check` tools, `email_list`/`sms_list` on contacts, `threshold` for SSL, WHOIS and RDAP expiry warnings, `service_name` and `locations` for CloudStatus
+- dashboard-management describes dashboards as check selections (by tag or check id) with services, alerts and metrics sections, replacing the widget model the server does not have
+- status-page-management covers components linked to checks through `service_id`, group components, and the `INCIDENT`/`SCHEDULED_MAINTENANCE` incident types, and hands follow-up incident updates to the web app
+- Skills name the settings the MCP tools cannot change (escalations, maintenance windows, SLA targets, pausing most check types) and send the user to the web app for them
+- README permission example uses the plugin's tool names and lists every read-only tool
+
+### Removed
+
+- The `get_contact` known-issue workaround
+
 ## [0.5.1] - 2026-03-18
 
 ### Changed

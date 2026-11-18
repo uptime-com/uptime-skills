@@ -22,8 +22,8 @@ Clarify with the user:
 
 For domain-level reporting:
 
-1. `list_checks` filtered by tag to get all checks for the domain.
-2. `get_check_stats` for each check with the target date range (YYYY-MM-DD format). Supports location filtering for regional breakdowns.
+1. `list_checks` with `tag` to get all checks for the domain.
+2. `get_check_stats` for each check with `start_date` and `end_date` (YYYY-MM-DD). `location` narrows it to one probe location for regional breakdowns.
 
 For account-wide reporting:
 
@@ -33,14 +33,16 @@ For account-wide reporting:
 
 ### Step 3: analyze
 
-Key metrics from `get_check_stats`:
+`get_check_stats` returns period totals (outages, downtime in seconds) and a daily breakdown (uptime %, response time in ms, outages, downtime). It gives no percentiles.
 
 | Metric                      | What it tells you                                                   |
 | --------------------------- | ------------------------------------------------------------------- |
 | Uptime %                    | Availability over the period. Compare against SLA targets.          |
-| Response time (avg/p95)     | Performance trends. Rising times may indicate degradation.          |
+| Response time (daily, ms)   | Performance trends. Rising times may indicate degradation.          |
 | Outage count                | Reliability. Frequent short outages may be worse than one long one. |
 | Downtime duration (seconds) | Total unavailability. Convert to minutes/hours for readability.     |
+
+For the period's uptime %, compute it from the total downtime (`1 - downtime_seconds / period_seconds`) rather than averaging the daily percentages.
 
 ### Step 4: present findings
 
@@ -81,7 +83,7 @@ Structure the report by audience:
 
 ### Caveats
 
-- Uptime % from `get_check_stats` is calculated per day. For sub-day precision, cross-reference with `list_outages`.
+- Uptime % from `get_check_stats` is calculated per day. For sub-day precision, cross-reference with `list_outages` (`search` by check name), whose entries carry start, resolution and duration.
 - Paused checks don't generate downtime data. If a check was paused during an outage, stats won't reflect the real availability.
 - Ignored alerts (via `ignore_alert`) are excluded from outage calculations and will affect uptime %.
 
@@ -152,11 +154,11 @@ Present reports as markdown tables for consistency. Example structure for a doma
 ### Per-check detail (when requested)
 
 ```
-| Check           | Type | Uptime % | Avg Response | P95 Response |
-| --------------- | ---- | -------- | ------------ | ------------ |
-| www.example.com | HTTP | 99.97%   | 185ms        | 420ms        |
-| example.com     | DNS  | 100.00%  | 12ms         | 28ms         |
-| example.com     | SSL  | 100.00%  | -            | -            |
+| Check           | Type | Uptime % | Avg Response | Outages |
+| --------------- | ---- | -------- | ------------ | ------- |
+| www.example.com | HTTP | 99.97%   | 185ms        | 1       |
+| example.com     | DNS  | 100.00%  | 12ms         | 0       |
+| example.com     | SSL  | 100.00%  | -            | 0       |
 ```
 
 For executive audiences, omit per-check detail and focus on the domain summary with SLA compliance status.
