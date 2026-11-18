@@ -25,26 +25,33 @@ When unsure, the test is whether the server behaved as its own tool description 
 2. **Draft** the report with the user's agreement, in the shape below.
 3. **Hand over a link** the user opens, reviews and submits. Nothing is filed without them.
 
-### The link
+URL-encode every value in the links below. The title is one line naming the skill and the fault or the missing guidance, e.g. `monitoring-optimization: names a nonexistent tool`.
+
+### Bug or inconsistency
+
+The repository's bug form, with its fields prefilled by `id`:
+
+```
+https://github.com/uptime-com/uptime-skills/issues/new?template=bug_report.yml&title=<title>&component=<component>&trigger-prompt=<prompt>&expected=<expected>&actual=<actual>&mcp-errors=<errors>
+```
+
+| Field            | Content                                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| `component`      | Exactly one of `skill: <skill-name>`, `agent: <agent-name>`, `reference material`, `plugin configuration` |
+| `trigger-prompt` | The user's request that led there                                                                         |
+| `expected`       | What the skill said, quoted, with the file it came from                                                   |
+| `actual`         | What the tool accepted or returned instead                                                                |
+| `mcp-errors`     | Any tool error text, verbatim                                                                             |
+
+The form also asks for the Claude Code version (`claude --version`) and the model; leave those for the user to fill in.
+
+### Feature request
 
 ```
 https://github.com/uptime-com/uptime-skills/issues/new?title=<title>&body=<body>
 ```
 
-URL-encode both values. The title is one line naming the skill and the fault or the missing guidance, e.g. `monitoring-optimization: names a nonexistent tool`.
-
-A bug or inconsistency body has these sections:
-
-| Section           | Content                                                                                       |
-| ----------------- | --------------------------------------------------------------------------------------------- |
-| Component         | `skill: <skill-name>`, `agent: <agent-name>`, `reference material`, or `plugin configuration` |
-| Trigger prompt    | The user's request that led there                                                             |
-| Expected behavior | What the skill said, quoted, with the file it came from                                       |
-| Actual behavior   | What the tool accepted or returned instead                                                    |
-| MCP tool errors   | Any tool error text, verbatim                                                                 |
-| Environment       | Claude Code version (`claude --version`) and model; leave for the user to fill in             |
-
-A feature request body names the task the user was doing, what guidance was missing, and what the skill should have said.
+The body names the task the user was doing, what guidance was missing, and what the skill should have said.
 
 ## Before the user submits
 
