@@ -12,31 +12,23 @@ Workflow for investigating alerts, outages, and service degradation.
 
 ### Step 1: get current alerts
 
-`list_alerts` to see all active alerts. Key fields:
+`list_alerts` with `resolved: false` for the alerts still down; `check_id`, `tag`, `type`, `search` and `start_date`/`end_date` (YYYY-MM-DD) narrow it further. Each entry gives the alert id, check name, check type, status, how many locations report it down, and the reporting location.
 
-| Field        | Meaning                                            |
-| ------------ | -------------------------------------------------- |
-| `alert_type` | Check type that triggered (HTTP, DNS, SSL, etc.)   |
-| `is_up`      | `false` = currently down, `true` = recovered       |
-| `created_at` | When the alert fired                               |
-| `output`     | Raw check output, the most useful diagnostic field |
+`get_alert` on an alert id returns each reporting location with its probe server and raw output, the most useful diagnostic field.
 
 ### Step 2: investigate the check
 
 `get_check` on the alerting check to see:
 
-- Current configuration (is it checking the right thing?)
-- Last response time and status
-- Whether the check is paused
-- Contact groups (is anyone being notified?)
+- Address, port, interval, sensitivity and locations (is it checking the right thing?)
+- Status (Up, Down, Paused, Under Maintenance), when it last changed, and last response time
+- Tags and notes (runbook links often live in notes)
+
+It does not show contact groups or escalations; if nobody seems to have been notified, ask the user to check the routing in the web app.
 
 ### Step 3: get outage details
 
-`list_outages` filtered by check to see the timeline:
-
-- Outage start and end times
-- Duration
-- Which probe locations detected the failure
+`list_outages` with `search` set to the check name (it has no check id filter) to see the timeline: each outage's start, resolution time and duration in seconds. `get_outage` on an outage id shows whether it is ongoing, how many locations report it down, and whether it is ignored.
 
 ## Correlation patterns
 
@@ -79,7 +71,7 @@ If checks across multiple unrelated domains fail simultaneously:
 
 ### Always check major providers
 
-- Check existing CloudStatus checks; if upstream dependency monitoring is configured, they will already show provider incidents
+- Check existing CloudStatus checks (`list_alerts` or `list_checks` with `tag: upstream-dependencies`); if upstream dependency monitoring is configured, they will already show provider incidents
 - If no CloudStatus checks exist, use web search to check for ongoing incidents at providers identified via DNS inference
 
 Key providers to check: Cloudflare, AWS, Google Cloud, Microsoft Azure, Fastly, Akamai.
@@ -116,11 +108,11 @@ If DNS checks show CNAME pointing to `*.cloudfront.net` and AWS CloudFront is re
 
 ### Check escalation rules
 
-Before triaging, note whether alerting checks have escalation rules. If escalation rules exist, someone may already be notified. If not and the outage is critical, manually notify appropriate stakeholders.
+Escalation rules are not visible through the MCP tools. Ask the user whether the alerting checks escalate; if they do, someone may already be notified. If not and the outage is critical, manually notify appropriate stakeholders.
 
 ### Immediate action needed
 
-- HTTP check on production service with `is_up: false` for > 5 minutes
+- HTTP check on production service down for > 5 minutes
 - SSL certificate expiring within 24 hours
 - DNS NS failure (cascading impact)
 - All checks for a domain failing simultaneously
@@ -147,13 +139,13 @@ False positives are alerts that fire when the service is actually healthy.
 
 If false positives are frequent, recommend adjusting the monitoring configuration:
 
-| Problem                         | Fix                                                                  |
-| ------------------------------- | -------------------------------------------------------------------- |
-| Single-location flapping        | Increase sensitivity to >= 2 (require multiple locations to confirm) |
-| Probe location unreliable       | Replace with a different location in the same region                 |
-| Timeout-based false alerts      | Increase `timeout` value to accommodate normal latency variance      |
-| Interval too aggressive         | Increase interval for non-critical checks (e.g. 1 min -> 5 min)      |
-| All checks share same locations | Diversify locations across regions to reduce correlated false alerts |
+| Problem                         | Fix                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| Single-location flapping        | Increase `sensitivity` to >= 2 (multiple locations must confirm)                   |
+| Probe location unreliable       | Replace with a different location in the same region                               |
+| Timeout-based false alerts      | Raise the timeout: `threshold` on API and Transaction checks; web app for the rest |
+| Interval too aggressive         | Increase interval for non-critical checks (e.g. 1 min -> 5 min)                    |
+| All checks share same locations | Diversify locations across regions to reduce correlated false alerts               |
 
 ## False negatives
 
@@ -168,14 +160,14 @@ False negatives are real outages that monitoring fails to detect. These are more
 
 ### Common causes
 
-| Cause                    | Why it happens                                                                 | Fix                                                             |
-| ------------------------ | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Missing check types      | Only HTTP monitored, but DNS was the actual failure point                      | Add DNS, SSL, ICMP checks for comprehensive coverage            |
-| Wrong endpoint monitored | Health endpoint returns 200 even when the app is broken                        | Monitor a functional endpoint that exercises the real code path |
-| `expect_string` not set  | HTTP check passes on any 200 response, even error pages                        | Add `expect_string` to verify response content                  |
-| Too few locations        | All probes are in one region; regional outage goes undetected from that region | Use 3-5 locations across multiple continents                    |
-| Check is paused          | Forgotten manual pause or stale maintenance window                             | Review paused checks; convert to scheduled maintenance windows  |
-| No upstream monitoring   | Provider outage causes degradation but no check covers the dependency          | Add CloudStatus checks for critical upstream providers          |
+| Cause                    | Why it happens                                                                 | Fix                                                               |
+| ------------------------ | ------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Missing check types      | Only HTTP monitored, but DNS was the actual failure point                      | Add DNS, SSL, ICMP checks for comprehensive coverage              |
+| Wrong endpoint monitored | Health endpoint returns 200 even when the app is broken                        | Monitor a functional endpoint that exercises the real code path   |
+| `expect_string` not set  | HTTP check passes on any 200 response, even error pages                        | Add `expect_string` to verify response content                    |
+| Too few locations        | All probes are in one region; regional outage goes undetected from that region | Use 3-5 locations across multiple continents                      |
+| Check is paused          | Forgotten manual pause or stale maintenance window                             | `list_checks` with `is_paused: true`; move to maintenance windows |
+| No upstream monitoring   | Provider outage causes degradation but no check covers the dependency          | Add CloudStatus checks for critical upstream providers            |
 
 ### When false negatives are frequent
 
@@ -183,7 +175,7 @@ Frequent false negatives indicate the monitoring strategy needs a broader review
 
 ## Ignoring alerts
 
-Use `ignore_alert` to exclude a confirmed false positive from outage calculations. This is important for accurate SLA reporting: ignored alerts don't count as downtime.
+Use `ignore_alert` to exclude a confirmed false positive from outage calculations. It toggles: calling it on an ignored alert un-ignores it, so check the alert's state with `get_alert` first. This is important for accurate SLA reporting: ignored alerts don't count as downtime.
 
 When to ignore:
 

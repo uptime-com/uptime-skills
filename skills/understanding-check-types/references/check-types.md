@@ -1,29 +1,32 @@
 ---
 name: check-types
 description: >-
-  Reference document for check type parameters, constraints, and location requirements. Used by monitoring-planning and monitoring-optimization skills.
+  Reference document for check type parameters, constraints, and location requirements as the Uptime.com MCP server exposes them. Used by the understanding-check-types skill.
 ---
 
 # Check type matrix
 
-Complete reference for all check types supported by the Uptime.com MCP server.
+Every check type has a `create_<type>_check` tool and an `update_<type>_check` tool. An update tool takes the check's `id` and the same fields as its create tool, and changes only the fields provided. Every create tool requires `name` and `contact_groups` (contact group names from `list_contacts`), and takes `tags` (tag names; create them first with `create_tag`).
 
 ## Location-based checks
 
-These checks run from explicit probe locations. Specify 3–5 locations and set sensitivity ≥ 2 to avoid false positives.
+These run from the probe locations passed in `locations` (identifiers from `list_locations`) and take `sensitivity`, the number of locations that must confirm an outage. Give 3–5 locations and sensitivity ≥ 2. `address`, `interval` and `locations` are required unless noted.
 
-| Type        | Required fields                                    | Key constraints                          | Typical interval |
-| ----------- | -------------------------------------------------- | ---------------------------------------- | ---------------- |
-| HTTP        | `address` (URL), `locations`                       | URL must include protocol (https://)     | 1–5 min          |
-| DNS         | `address` (domain), `dns_record_type`, `locations` | See record types below                   | 5–10 min         |
-| ICMP (Ping) | `address` (hostname/IP), `locations`               | Target must respond to ICMP              | 1–5 min          |
-| TCP         | `address` (hostname), `port`, `locations`          | Requires explicit port number            | 1–5 min          |
-| UDP         | `address` (hostname), `port`, `locations`          | Requires explicit port and expect_string | 5–10 min         |
-| SMTP        | `address` (mail server), `port`, `locations`       | Default port 25; use 587 for submission  | 5–10 min         |
-| IMAP        | `address` (mail server), `port`, `locations`       | Default port 143 (993 for TLS)           | 5–10 min         |
-| POP         | `address` (mail server), `port`, `locations`       | Default port 110 (995 for TLS)           | 5–10 min         |
-| SSH         | `address` (hostname), `port`, `locations`          | Default port 22                          | 5–10 min         |
-| NTP         | `address` (NTP server), `locations`                | Validates time synchronization           | 10–30 min        |
+| Type | Tool suffix | Also required | Optional                                                                            | Typical interval |
+| ---- | ----------- | ------------- | ----------------------------------------------------------------------------------- | ---------------- |
+| HTTP | `http`      |               | `expect_string`, `headers`, `send_string`, `username`, `password`, `port`, `notes`  | 1–5 min          |
+| DNS  | `dns`       |               | `dns_record_type`, `dns_server`, `expect_string`                                    | 5–10 min         |
+| ICMP | `icmp`      |               |                                                                                     | 1–5 min          |
+| TCP  | `tcp`       | `port`        | `send_string`, `expect_string`                                                      | 1–5 min          |
+| UDP  | `udp`       | `port`        | `send_string`, `expect_string`                                                      | 5–10 min         |
+| SMTP | `smtp`      |               | `port` (25, or 465/587), `encryption` (`SSL` or `STARTTLS`), `username`, `password` | 5–10 min         |
+| IMAP | `imap`      |               | `port` (143, or 993), `encryption`, `expect_string`                                 | 5–10 min         |
+| POP  | `pop`       |               | `port` (110, or 995), `encryption`, `expect_string`                                 | 5–10 min         |
+| SSH  | `ssh`       |               | `port` (22)                                                                         | 5–10 min         |
+| NTP  | `ntp`       |               | `port` (123), `threshold` (maximum time offset, ms)                                 | 10–30 min        |
+
+- HTTP `address` is a full URL including the scheme (`https://example.com`). `headers` is one `Header: Value` per line.
+- UDP needs `send_string` and `expect_string` to get and verify a response from most services.
 
 ### DNS record types
 
@@ -34,148 +37,84 @@ These checks run from explicit probe locations. Specify 3–5 locations and set 
 | MX          | parent domain (e.g. `example.com`) | Mail routing — zone-level record          |
 | NS          | parent domain                      | Nameserver delegation — zone-level record |
 | TXT         | domain                             | SPF, DKIM, DMARC verification             |
-| SOA         | parent domain                      | Zone authority                            |
 
-## Non-probe checks
+## Scripted checks
 
-These checks are **location-independent**: the thing they measure is a single global fact, not a per-vantage-point observation. Certificate expiry (SSL), domain registration (WHOIS/RDAP), blacklist status, and malware indicators return the same answer regardless of where the query runs. Location is therefore not a parameter, and these checks accept neither `locations` nor `sensitivity`. The `update_*` tools for these types do not expose those fields.
+Marketed as **Synthetic Monitoring**. Neither takes an `address`: the URLs live in the script.
 
-Consequence: no confirmation quorum. A single-probe blip (e.g. a transient network failure reaching the target) can surface as a one-off alert. This is inherent to the check type, not a misconfiguration, and cannot be tuned away via sensitivity. If you need multi-location confirmation for connectivity, pair the check with a location-based check (e.g. a TCP 443 check alongside an SSL check) and treat the location-independent check as its specialized signal (cert expiry, blacklist status, etc.).
+| Type        | Tool suffix   | Required              | Optional                                                                                    |
+| ----------- | ------------- | --------------------- | ------------------------------------------------------------------------------------------- |
+| Transaction | `transaction` | `script`, `locations` | `interval`, `threshold` (timeout, s, default 30), `num_retries`, `sensitivity`, `is_paused` |
+| API         | `api`         | `script`, `locations` | the Transaction fields, plus `use_ip_version` (`IPV4` or `IPV6`)                            |
 
-**SSL caveat**: the check assumes one certificate for the host. Split-horizon setups (different certificates served per region) are not supported. The check reflects whichever certificate the server's query path receives.
+Script syntax lives in the `transaction-scripting` and `api-scripting` skills. Transaction checks have an open location problem; see `transaction-scripting`.
 
-| Type      | Required fields                                | Key constraints                                               | Typical interval |
-| --------- | ---------------------------------------------- | ------------------------------------------------------------- | ---------------- |
-| SSL       | `address` (hostname)                           | Monitors certificate expiry and chain. See SSL fields below   | 60–1440 min      |
-| Blacklist | `address` (hostname/IP)                        | Marketed as **Domain Health** — checks DNS blacklists (RBLs)  | 1440 min         |
-| Malware   | `address` (URL)                                | Marketed as **Domain Health** — scans for malware indicators  | 1440 min         |
-| WHOIS     | `address` (registered domain), `expect_string` | Domain only — no subdomains. Set expect_string to domain name | 1440 min         |
-| RDAP      | `address` (registered domain), `expect_string` | Domain only — no subdomains. Redundancy for WHOIS             | 1440 min         |
+## Page Speed
 
-## Constrained checks
+Tool suffix `pagespeed`. Required: `address` (URL), `interval`, `locations`. Optional: `emulated_device` (e.g. `desktop`, `mobile`), `connection_throttling`, `uptime_grade_threshold` (minimum Lighthouse grade).
 
-| Type       | Required fields                          | Key constraints                                               | Typical interval |
-| ---------- | ---------------------------------------- | ------------------------------------------------------------- | ---------------- |
-| Page Speed | `address` (URL), `locations` (exactly 1) | Must use `Dedicated-*` location prefix. Min interval 1440 min | 1440 min         |
+- Exactly **1 location**, and it must be a `Dedicated-*` location (e.g. `Dedicated-United Kingdom-London`); only dedicated nodes run Lighthouse.
+- Minimum interval **1440** minutes. The tool defaults `interval` to 5, so always pass 1440 or more.
 
-## Cloud status checks
+## CloudStatus
 
-| Type        | Required fields                  | Key constraints                                                                  | Typical interval  |
-| ----------- | -------------------------------- | -------------------------------------------------------------------------------- | ----------------- |
-| CloudStatus | `cloudstatusconfig.service_name` | Must match an exact component name. Use MCP tools to discover available services | Derived from feed |
+CloudStatus (marketed as **Third-party monitoring**) follows a cloud provider's official status feed. Tool suffix `cloudstatus`. Required: `service_name`, `locations`. Optional: `is_paused`. No `address`, `interval` or `sensitivity`.
 
-CloudStatus (marketed as **Third-party monitoring**) monitors a cloud provider's official status page natively within Uptime.com. No `address` or `locations` needed — the service is identified by `service_name`. Use for upstream dependency monitoring.
+`service_name` must be an exact service name: find the provider with `list_cloudstatus_providers`, then the service with `search_cloudstatus_services` (e.g. `AWS - Amazon Elastic Compute Cloud`).
 
-## Aggregate checks
+## Auto-located checks
 
-| Type  | Required fields                                  | Key constraints                                                      | Typical interval           |
-| ----- | ------------------------------------------------ | -------------------------------------------------------------------- | -------------------------- |
-| Group | Checks (manual selection or auto-select by tags) | No address — aggregates other checks. Alert conditions: any/all down | Derived from member checks |
+The server assigns locations; these take no `locations`, `sensitivity` or `interval`. Required: `address`.
 
-### Group check details
+| Type      | Tool suffix | Also required   | Optional                                                                                                 |
+| --------- | ----------- | --------------- | -------------------------------------------------------------------------------------------------------- |
+| SSL       | `ssl`       |                 | `threshold` (days before expiry to alert), `port` (443), `protocol` (`HTTPS`, `IMAPS`, `POP3S`, `SMTPS`) |
+| Blacklist | `blacklist` |                 |                                                                                                          |
+| Malware   | `malware`   |                 |                                                                                                          |
+| WHOIS     | `whois`     | `expect_string` | `threshold` (days before registration expiry to alert)                                                   |
+| RDAP      | `rdap`      | `expect_string` | `threshold`                                                                                              |
 
-Group checks combine multiple individual checks into one logical unit:
+- Blacklist (DNS blacklists) and Malware (Google Safe Browsing) are marketed together as **Domain Health**.
+- WHOIS and RDAP take the registered domain, never a subdomain, with `expect_string` set to that domain. RDAP is the redundancy for unreliable WHOIS servers.
 
-- **Manual selection**: pick specific checks to include
-- **Auto-select by tags**: dynamically include all checks with matching tags (new checks tagged later are automatically included)
-- **Alert conditions**: configure when the group is considered down (any member down, all members down, or N-of-M threshold)
-- **Uptime % calculation**: group-level SLA computed from members
-- **Response time**: copy from a single check or average across a check type
+Each measures a single global fact (certificate expiry, registration, listing status), so location is not a parameter. Consequence: no confirmation quorum. A single-probe blip can surface as a one-off alert, and no setting tunes it away. Where multi-location confirmation of connectivity matters, pair the check with a location-based one (e.g. TCP 443 beside SSL) and treat the auto-located check as its specialized signal.
 
-Tag-based auto-selection reinforces the "tag first" pattern — when checks are properly tagged on creation, group checks automatically include them.
+**SSL caveat**: the check assumes one certificate per host. Split-horizon setups (different certificates per region) are not supported.
 
-## Synthetic / advanced checks
+## Push and passive checks
 
-Marketed as **Synthetic Monitoring** — these checks simulate user interactions rather than simple endpoint polling.
+No probes run against these, so they take no `locations` or `sensitivity`.
 
-| Type               | Required fields                 | Key constraints                                                                                                                       | Typical interval     |
-| ------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| Transaction        | `address` (URL), script steps   | Multi-step browser interaction. See `transaction-scripting` skill for full scripting reference. Default IP version differs (not IPv4) | 5–30 min             |
-| API                | `address` (URL), request config | Multi-step API calls with assertions. See `api-scripting` skill for full scripting reference. Default IP version differs              | 5–30 min             |
-| RUM                | Site tag (JavaScript snippet)   | Marketed as **Real User Monitoring** — no probe locations, measures actual visitor performance                                        | Continuous           |
-| Custom (Heartbeat) | Heartbeat URL (generated)       | Marketed as **Heartbeat monitoring** — process pushes to Uptime.com, alerts if heartbeat stops                                        | Configurable timeout |
+| Type      | Tool suffix   | Fields                                 | Notes                                                                                                                  |
+| --------- | ------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Heartbeat | `heartbeat`   | `interval` (required)                  | Marketed as **Heartbeat monitoring**. The service pings a generated URL; alerts when no ping arrives within `interval` |
+| Webhook   | `webhook`     |                                        | External systems post status to a generated URL                                                                        |
+| RUM, RUM2 | `rum`, `rum2` | `address` (required), `threshold` (ms) | Marketed as **Real User Monitoring**. Needs a JavaScript snippet on the site                                           |
 
-**RUM-specific field**: `max_load_time` — alert if average page load exceeds this threshold (seconds). Only applicable to RUM checks.
+## Group checks
 
-## Field reference
+Tool suffix `group`. Aggregates other checks; no `address`, `locations` or `interval`.
 
-### Common optional fields (all check types)
+| Field            | Meaning                                                                     |
+| ---------------- | --------------------------------------------------------------------------- |
+| `check_tags`     | Tag names whose checks belong to the group; checks tagged later join it too |
+| `services`       | Check names to include explicitly                                           |
+| `down_condition` | `ANY` or `ALL` members down                                                 |
 
-| Field                       | Description                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------- |
-| `name`                      | Display name (auto-generated from address if omitted)                        |
-| `tags`                      | Array of tag names for grouping. Also drives Group check auto-selection      |
-| `contact_groups`            | Array of contact group names                                                 |
-| `interval`                  | Minutes between checks                                                       |
-| `sensitivity`               | Number of confirming locations (≥ 2 recommended). Location-based checks only; location-independent checks (SSL, Blacklist, Malware, WHOIS, RDAP, CloudStatus, RUM) do not accept it |
-| `timeout`                   | Seconds before check times out. Detects firewalls, overloaded servers        |
-| `is_paused`                 | Create in paused state                                                       |
-| `notes`                     | Free-text notes visible in dashboard                                         |
-| `use_ip_version`            | `IPV4`, `IPV6`, or `ANY`. Default IPv4 (Transaction/API default differently) |
-| `include_in_global_metrics` | Include check in dashboards and SLA calculations                             |
-| `escalations`               | Alert escalation rules (separate from contact groups — see below)            |
-| `maintenance`               | Scheduled maintenance windows (recurring pauses)                             |
-| `uptime_sla_threshold`      | Target uptime percentage for SLA tracking                                    |
-| `response_time_sla`         | Target response time (ms) for SLA tracking                                   |
+Tag-based membership is why every check gets its domain tag on creation.
 
-### Escalations vs contact groups
+## Not settable through the MCP server
 
-Contact groups define _who_ gets notified. Escalations define _when_ and _how_ notifications intensify:
+These are real Uptime.com features with no MCP tool field. Recommend them where they help, and tell the user to configure them in the Uptime.com web app:
 
-- Contact groups receive the initial alert
-- Escalation rules trigger if the alert is not acknowledged within a time window
-- Escalations can notify different contacts or use different channels (e.g. phone call after SMS)
+- Escalations (who is notified when an alert goes unacknowledged)
+- Maintenance windows
+- SLA targets: uptime threshold, response time threshold
+- HTTP method, expected status code, `expect_string` match mode (regex), proxy, certificate verification, minimum TLS version
+- SSL certificate matching: fingerprint, issuer, alternative names
+- IP version, except on API checks
+- Pausing, except on API, Transaction and CloudStatus checks (`is_paused`)
+- Contact methods other than email and SMS (phone, integrations)
+- Group check N-of-M conditions and response time settings
 
-### Maintenance windows
-
-Scheduled maintenance is preferred over manual pausing:
-
-- Define recurring windows (e.g. every Sunday 02:00–04:00)
-- Checks pause automatically during the window
-- No manual intervention needed — no risk of forgetting to resume
-- Alerts auto-resolve when a check enters maintenance (`bulk_alert_resolution_on_pause`)
-
-### HTTP-specific fields
-
-| Field                   | Description                                                                                    |
-| ----------------------- | ---------------------------------------------------------------------------------------------- |
-| `expect_string`         | String that must appear in response body                                                       |
-| `expect_string_type`    | Matching mode: `STRING` (contains), `REGEX`, or exact match                                    |
-| `http_method`           | `GET`, `POST`, `HEAD`, etc.                                                                    |
-| `send_string`           | POST body data (URL-encoded for HTTP, raw for TCP/UDP)                                         |
-| `expect_status_code`    | HTTP status codes considered successful (default: 2xx). Customize for APIs returning 3xx, etc. |
-| `headers`               | Custom request headers                                                                         |
-| `username` / `password` | Basic auth credentials. Use unprivileged test accounts                                         |
-| `proxy_url`             | Route check through a proxy server                                                             |
-| `verify_ssl_cert`       | Toggle SSL/TLS certificate validation on HTTPS checks                                          |
-| `min_tls_version`       | Enforce minimum TLS version (e.g. TLS 1.2)                                                     |
-| `block_urls`            | URLs to exclude from loading                                                                   |
-| `emulate_device`        | Simulate specific device/browser                                                               |
-| `connection_throttling` | Simulate network conditions (3G, slow connection, etc.)                                        |
-
-### DNS-specific fields
-
-| Field                   | Description                                             |
-| ----------------------- | ------------------------------------------------------- |
-| `dns_record_type`       | Record type to query (A, AAAA, CNAME, MX, NS, TXT, SOA) |
-| `dns_server`            | Custom DNS resolver (default: system resolver)          |
-| `expect_string`         | Expected record value in response                       |
-| `force_host_resolution` | Pin IP address resolution                               |
-
-### SSL-specific fields
-
-| Field                    | Description                                              |
-| ------------------------ | -------------------------------------------------------- |
-| `before_expiry`          | Alert N days before certificate expires                  |
-| `min_tls_version`        | Enforce minimum SSL/TLS version                          |
-| `match_cert_fingerprint` | Verify SHA-1 certificate fingerprint (pin specific cert) |
-| `match_issuer_name`      | Verify expected Certificate Authority                    |
-| `match_additional_names` | Verify Subject Alternative Names (SANs)                  |
-| `validate_crl_url`       | CRL validation endpoint URL                              |
-
-### SMTP-specific fields
-
-| Field                   | Description                               |
-| ----------------------- | ----------------------------------------- |
-| `encryption`            | Enable TLS encryption for SMTP connection |
-| `username` / `password` | SMTP auth credentials                     |
+`get_check` reports type, address, port, status, last response time, interval, sensitivity, locations, tags and notes. It does not report contact groups, escalations, check-specific fields or scripts.

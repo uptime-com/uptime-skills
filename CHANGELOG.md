@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- reporting-issues skill: when a skill contradicts the MCP tools or lacks guidance, Claude drafts a GitHub issue for this repository for you to review and submit
+- monitoring-planning references for choosing check types and designing alert routing
+- Skills check plan limits with `get_account_usage` before creating checks or dashboards
+- monitoring-planning stops and asks you to connect the Uptime.com MCP server when its tools are missing
+
+### Changed
+
+- Skills and agents load from the plugin root, so Claude Code discovers them on install
+- Scripting step catalogs live in reference files again, rebuilt from the check runners' source
+- monitoring-planning tags every check on creation, names checks `<domain> <check-type>`, and creates checks without asking you to confirm each batch
+- Location-independent checks (SSL, Blacklist, Malware, WHOIS, RDAP) are explained as having no confirmation quorum to tune
+- Signing in to the Uptime.com MCP server no longer uses a pre-registered OAuth client id; Claude Code identifies itself to uptime.com on its own
+- Skills, references and agents match the tools of Uptime.com MCP server 0.18.0: per-type `update_<type>_check` tools, `email_list`/`sms_list` on contacts, `threshold` for SSL, WHOIS and RDAP expiry warnings, `service_name` and `locations` for CloudStatus
+- dashboard-management describes dashboards as check selections (by tag or check id) with services, alerts and metrics sections, replacing the widget model the server does not have
+- status-page-management covers components linked to checks through `service_id`, group components, and the `INCIDENT`/`SCHEDULED_MAINTENANCE` incident types, and hands follow-up incident updates to the web app
+- Skills name the settings the MCP tools cannot change (escalations, maintenance windows, SLA targets, pausing most check types) and send the user to the web app for them
+- README permission example uses the plugin's tool names and lists every read-only tool
+
+### Removed
+
+- The `get_contact` known-issue workaround
+
+### Fixed
+
+- transaction-scripting lists the `viewport_size` values the runner accepts
+
 ## [0.5.1] - 2026-03-18
 
 ### Changed

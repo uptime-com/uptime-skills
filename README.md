@@ -2,6 +2,8 @@
 
 AI agent skills and context for working with [Uptime.com](https://uptime.com) monitoring infrastructure.
 
+[Discuss with Claude](https://claude.ai/new?q=Help%20me%20install%20the%20Uptime.com%20skills%20plugin%20for%20Claude%20Code%20and%20connect%20it%20to%20my%20Uptime.com%20account.%20Follow%20the%20instructions%20at%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-skills%23installation.%20If%20I%20use%20a%20different%20MCP%20client%2C%20use%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-mcp%23hosted-server%20instead.) · [Discuss with ChatGPT](https://chatgpt.com/?q=Help%20me%20install%20the%20Uptime.com%20skills%20plugin%20for%20Claude%20Code%20and%20connect%20it%20to%20my%20Uptime.com%20account.%20Follow%20the%20instructions%20at%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-skills%23installation.%20If%20I%20use%20a%20different%20MCP%20client%2C%20use%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-mcp%23hosted-server%20instead.) · [Discuss with Perplexity](https://www.perplexity.ai/search?q=Help%20me%20install%20the%20Uptime.com%20skills%20plugin%20for%20Claude%20Code%20and%20connect%20it%20to%20my%20Uptime.com%20account.%20Follow%20the%20instructions%20at%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-skills%23installation.%20If%20I%20use%20a%20different%20MCP%20client%2C%20use%20https%3A%2F%2Fgithub.com%2Fuptime-com%2Fuptime-mcp%23hosted-server%20instead.)
+
 ## Installation
 
 Add the marketplace and install the plugin:
@@ -17,7 +19,7 @@ After installation, authenticate with the Uptime.com MCP server:
 /mcp
 ```
 
-Select the `uptime` server and follow the browser login flow. Tokens are stored securely and refreshed automatically.
+Select the `uptime` server and follow the browser login flow. Claude Code stores the token and refreshes it. The server accepts only this OAuth sign-in; Uptime.com account API tokens are not accepted.
 
 ### Updating
 
@@ -27,7 +29,7 @@ Select the `uptime` server and follow the browser login flow. Tokens are stored 
 
 ### Team installation
 
-Add to your project's `.claude/settings.json`:
+Add to your project's `.claude/settings.json`. The `allow` list pre-approves the read-only tools; tools that create, change or delete prompt as usual.
 
 ```json
 {
@@ -40,7 +42,7 @@ Add to your project's `.claude/settings.json`:
     "uptime@uptime-com": true
   },
   "permissions": {
-    "allow": ["mcp__uptime__list_checks", "mcp__uptime__list_tags", "mcp__uptime__list_contacts", "mcp__uptime__list_alerts", "mcp__uptime__list_outages", "mcp__uptime__get_check", "mcp__uptime__get_status_page", "mcp__uptime__get_account_usage"]
+    "allow": ["mcp__plugin_uptime_uptime__list_checks", "mcp__plugin_uptime_uptime__get_check", "mcp__plugin_uptime_uptime__get_check_stats", "mcp__plugin_uptime_uptime__list_tags", "mcp__plugin_uptime_uptime__get_tag", "mcp__plugin_uptime_uptime__list_contacts", "mcp__plugin_uptime_uptime__get_contact", "mcp__plugin_uptime_uptime__list_alerts", "mcp__plugin_uptime_uptime__get_alert", "mcp__plugin_uptime_uptime__list_outages", "mcp__plugin_uptime_uptime__get_outage", "mcp__plugin_uptime_uptime__list_locations", "mcp__plugin_uptime_uptime__get_location", "mcp__plugin_uptime_uptime__list_dashboards", "mcp__plugin_uptime_uptime__get_dashboard", "mcp__plugin_uptime_uptime__list_status_pages", "mcp__plugin_uptime_uptime__get_status_page", "mcp__plugin_uptime_uptime__list_status_page_components", "mcp__plugin_uptime_uptime__get_status_page_component", "mcp__plugin_uptime_uptime__list_status_page_incidents", "mcp__plugin_uptime_uptime__get_status_page_incident", "mcp__plugin_uptime_uptime__list_cloudstatus_providers", "mcp__plugin_uptime_uptime__search_cloudstatus_services", "mcp__plugin_uptime_uptime__get_account_usage", "mcp__plugin_uptime_uptime__search_issues"]
   }
 }
 ```
@@ -49,7 +51,9 @@ Add to your project's `.claude/settings.json`:
 
 ### MCP Server
 
-Connects Claude Code to the [Uptime.com MCP server](https://support.uptime.com/hc/en-us/articles/30498498498964-MCP-Model-Context-Protocol) with OAuth authentication.
+Connects Claude Code to the hosted [Uptime.com MCP server](https://github.com/uptime-com/uptime-mcp) at `https://mcp.uptime.com/mcp`, with OAuth authentication. Set `UPTIME_MCP_URL` to point the plugin at another instance.
+
+When a tool misbehaves, the server's `search_issues` and `report_issue` tools draft a GitHub issue for you to review and submit; nothing is filed without you.
 
 ### Skills
 
@@ -64,17 +68,27 @@ Skills are auto-invoked by Claude based on conversation context.
 | **monitoring-optimization**   | "audit monitoring", "optimize checks", "fill gaps"  |
 | **performance-reporting**     | "what's our uptime", "SLA report", "monthly report" |
 | **incident-triage**           | "site is down", "investigate outage"                |
-| **dashboard-management**      | "create dashboard", "add widgets"                   |
+| **dashboard-management**      | "create dashboard", "add checks to a dashboard"     |
 | **status-page-management**    | "set up status page", "add components"              |
+| **reporting-issues**          | a skill contradicts a tool, "report a bug"          |
+
+### Agents
+
+| Agent                     | Handles                                                              |
+| ------------------------- | -------------------------------------------------------------------- |
+| **transaction-scripting** | Writing Transaction check scripts, with the step reference preloaded |
+| **api-scripting**         | Writing API check scripts, with the step reference preloaded         |
 
 ## Prerequisites
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
 - [Uptime.com](https://uptime.com) account
 
-## Contributing
+## Reporting issues
 
-<!-- TODO -->
+Report wrong or inconsistent skill guidance, and request new guidance, in this repository's [issue tracker](https://github.com/uptime-com/uptime-skills/issues). Claude drafts the report for you when a skill turns out to be wrong; you review and submit it.
+
+Faults in the MCP server itself go to the [uptime-mcp tracker](https://github.com/uptime-com/uptime-mcp/issues).
 
 ## License
 

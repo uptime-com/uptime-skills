@@ -1,152 +1,83 @@
 ---
 name: dashboard-management
 description: >-
-  This skill should be used when the user asks to "create a dashboard", "set up a dashboard", "organize monitoring views", "build a dashboard", "add widgets", "monitoring dashboard", or wants to create visual overviews of their monitoring checks. Covers dashboard creation patterns and widget organization.
+  This skill should be used when the user asks to "create a dashboard", "set up a dashboard", "organize monitoring views", "build a dashboard", "add checks to a dashboard", "monitoring dashboard", or wants to create visual overviews of their monitoring checks. Covers dashboard scoping, check selection, and section settings.
 ---
 
-# Dashboard management — operational knowledge
+# Dashboard management
 
 Workflow patterns for creating and organizing monitoring dashboards.
 
+## Dashboard model
+
+A dashboard has no widgets. It is a set of checks shown in up to three sections, each switched on or off:
+
+| Section  | Toggle                  | What it shows                       | Settings                                                                                         |
+| -------- | ----------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Services | `services_show_section` | The selected checks and their state | `services_num_to_show`, `services_primary_sort`, `services_secondary_sort`, `services_include_*` |
+| Alerts   | `alerts_show_section`   | Recent alerts                       | `alerts_num_to_show` (5, 10, 15), `alerts_for_all_checks`                                        |
+| Metrics  | `metrics_show_section`  | Metrics for the selected checks     | `metrics_for_all_checks`                                                                         |
+
+Checks are selected two ways, combinable:
+
+- `services_tags`: tag names; every check carrying one is included, including checks tagged later.
+- `services_selected`: check ids from `list_checks`, for a fixed set.
+
+`services_include_up`, `services_include_down`, `services_include_paused` and `services_include_maintenance` filter the services section by state. `is_pinned` pins the dashboard to the top of the list.
+
+Tag selection is the default choice: it keeps the dashboard current as checks come and go.
+
 ## Dashboard creation workflow
 
-### Step 1 — Determine scope
+### Step 1: determine scope
 
-Dashboards work best when they have a clear purpose. Common patterns:
+| Pattern                | Selection                                               | Use case                                         |
+| ---------------------- | ------------------------------------------------------- | ------------------------------------------------ |
+| Domain dashboard       | `services_tags`: the domain tag                         | Per-service visibility                           |
+| Team dashboard         | `services_tags`: the team's tags                        | Team-level overview                              |
+| Service tier dashboard | `services_tags`: e.g. `production`                      | Executive or on-call view                        |
+| Check type dashboard   | `services_selected`: ids from `list_checks` with `type` | Focused monitoring (certificate expiry overview) |
 
-| Pattern                | Scope                             | Use case                                         |
-| ---------------------- | --------------------------------- | ------------------------------------------------ |
-| Domain dashboard       | All checks for one domain         | Per-service visibility                           |
-| Team dashboard         | All checks owned by a team        | Team-level overview                              |
-| Service tier dashboard | All critical/production checks    | Executive or on-call view                        |
-| Check type dashboard   | All checks of one type (e.g. SSL) | Focused monitoring (certificate expiry overview) |
+### Step 2: check capacity and gather checks
 
-### Step 2 — Check capacity and gather checks
+Call `get_account_usage` to check whether dashboard limits apply to the account. If limits exist and are near capacity (>80%), warn the user before creating a dashboard.
 
-Call `get_account_usage` to check whether dashboard or widget limits apply to the account. If limits exist and are near capacity (>80%), warn the user before creating new dashboards or widgets.
+- `list_tags` to find the tags for a tag-scoped dashboard, or to discover the grouping structure if scope isn't clear.
+- `list_checks` with `type` (and `tag`) for the ids of a check-type dashboard.
+- `list_dashboards` to see whether a dashboard for this scope already exists.
 
-Gather checks based on the chosen scope:
+### Step 3: create dashboard
 
-- `list_checks` with tag filter for domain/team dashboards
-- `list_checks` then filter by check type for type-specific dashboards
-- `list_tags` to discover grouping structure if scope isn't clear
+`create_dashboard` with `name` and the selection from Step 1. Section settings by audience:
 
-### Step 3 — Create dashboard
+| Audience  | Settings                                                                                                                  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Overview  | Services on, sorted `is_paused,cached_state_is_up` so down checks come first; alerts on                                   |
+| On-call   | Services on with `services_include_up: false`, so only checks needing attention show; alerts on, `alerts_num_to_show: 15` |
+| Executive | Services and metrics on; alerts off                                                                                       |
 
-`create_dashboard` with:
-
-- **Name**: descriptive, matching the scope (e.g. "example.com monitoring", "Platform team overview")
-- **Description**: brief note on what this dashboard covers and who it's for
-
-### Step 4 — Add widgets
-
-Add widgets for the checks gathered in Step 2. Widget selection depends on what information matters for the dashboard's audience.
-
-## Widget selection guidance
-
-| Widget type       | Best for             | Notes                                             |
-| ----------------- | -------------------- | ------------------------------------------------- |
-| Check status      | At-a-glance up/down  | Use for overview dashboards — shows current state |
-| Response time     | Performance trending | Best for HTTP and TCP checks — shows latency      |
-| Uptime percentage | SLA reporting        | Shows uptime over a time window                   |
-| Alert history     | Incident patterns    | Shows when and how often alerts fired             |
-
-### Widget configuration
-
-When adding a widget, specify:
-
-- **Check**: which monitoring check the widget displays data for
-- **Widget type**: one of the types above
-- **Time range**: the lookback window for historical data (e.g. 24h, 7d, 30d)
-
-Response time and uptime percentage widgets are most useful with longer time ranges (7d+). Check status widgets are best with short/live views.
-
-### Widget types by check type
-
-Not all widget types make sense for all check types:
-
-| Check type          | Check status | Response time | Uptime % | Alert history |
-| ------------------- | ------------ | ------------- | -------- | ------------- |
-| HTTP                | Yes          | Yes           | Yes      | Yes           |
-| DNS, ICMP, TCP, UDP | Yes          | Yes           | Yes      | Yes           |
-| SSL, WHOIS, RDAP    | Yes          | No            | Yes      | Yes           |
-| Blacklist, Malware  | Yes          | No            | No       | Yes           |
-| Page Speed          | Yes          | No            | No       | No            |
-| Group               | Yes          | No            | Yes      | Yes           |
-| Transaction, API    | Yes          | Yes           | Yes      | Yes           |
-
-SSL, WHOIS, RDAP, Blacklist, and Malware are auto-located checks with infrequent intervals, so response time widgets add no value. Page Speed produces Lighthouse scores, not uptime data.
-
-### Recommended layouts
-
-**Domain dashboard**: group widgets by check type
-
-1. HTTP checks (status + response time)
-2. DNS checks (status)
-3. SSL/Certificate checks (status + expiry)
-4. Infrastructure checks (ICMP, TCP — status)
-5. Registration checks (WHOIS, RDAP — status)
-
-**On-call dashboard**: prioritize actionable information
-
-1. Currently alerting checks (status, filtered to down)
-2. Recently recovered checks
-3. Response time anomalies
-
-**Executive dashboard**: focus on outcomes
-
-1. Uptime percentages for key services
-2. Page Speed scores
-3. SSL certificate expiry countdown
+The sort values the tools accept: `cached_ordering`, `device__address`, `-created_at`, `is_paused,cached_state_is_up`, `-cached_last_down_alert_at`, `-cached_response_time`.
 
 ## Naming conventions
 
-Consistent dashboard names help with discovery:
-
-- `{domain} monitoring` — per-domain dashboards
-- `{team} overview` — team dashboards
-- `{purpose} dashboard` — special-purpose (e.g. "SSL expiry dashboard")
+- `{domain} monitoring`: per-domain dashboards
+- `{team} overview`: team dashboards
+- `{purpose} dashboard`: special-purpose (e.g. "SSL expiry dashboard")
 
 ## Updating existing dashboards
 
-When monitoring evolves, dashboards need to keep up.
+`update_dashboard` takes the dashboard `id` and changes only the fields provided. `services_tags` and `services_selected` replace the whole list, so include the entries to keep.
 
-### Adding checks to a dashboard
+1. `get_dashboard` for the current selection and settings.
+2. For a tag-scoped dashboard, new checks appear once tagged; nothing to update.
+3. For an id-scoped dashboard, pass the full new `services_selected`: drop deleted checks, add new ones.
 
-1. `get_dashboard` to see current widgets.
-2. Identify which new checks are missing.
-3. Add widgets for each new check, matching the existing layout pattern.
-
-### Rebuilding a dashboard
-
-When a dashboard has drifted significantly (many stale widgets, missing checks):
-
-1. `list_checks` with the domain tag to get the current check set.
-2. Compare against existing widgets.
-3. Remove widgets for deleted checks.
-4. Add widgets for new checks.
-5. Reorder to match the layout conventions above.
-
-### When to create a new dashboard vs update
-
-- **Update**: checks were added or removed, but the scope is the same
-- **New dashboard**: monitoring scope changed (e.g. a domain was split into multiple services, or a new team took ownership)
-
-## Maintenance
-
-Dashboards can drift as checks are added or removed:
-
-- When creating new checks, add them to the relevant dashboard
-- When deleting checks, associated widgets may need cleanup
-- Periodically review dashboards for stale or orphaned widgets
-- When `monitoring-optimization` finds configuration issues, update widgets to reflect changes
+Create a new dashboard instead of updating when the scope itself changed (a domain split into several services, a new team took ownership).
 
 ## Deleting dashboards
 
-Use `delete_dashboard` only for permanent removal. Deletion removes all widgets. If a dashboard is temporarily unneeded, consider removing widgets instead and keeping the dashboard shell for later reuse.
-
-Before deleting, confirm the dashboard isn't referenced by other team members or linked from external tools (e.g. Slack bookmarks, wiki pages).
+`delete_dashboard` is permanent. Before deleting, confirm the dashboard isn't referenced by other team members or linked from external tools (e.g. Slack bookmarks, wiki pages).
 
 ## Linking dashboards to setup workflow
 
-When `monitoring-planning` creates checks for a new domain, Phase 2 creates a dashboard. This ensures every monitored domain has a corresponding dashboard from day one. The dashboard should include widgets for all checks created during setup.
+When `monitoring-planning` creates checks for a new domain, Phase 4 creates a dashboard selected by the domain tag, so every monitored domain has one from day one.

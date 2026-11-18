@@ -2,10 +2,7 @@
   "mcpServers": {
     "uptime": {
       "type": "http",
-      "url": "${UPTIME_MCP_URL:-https://mcp.uptime.com/mcp}",
-      "oauth": {
-        "clientId": "MYH77e5qvqbYjKU01EBgIYU8ZQwhVGxpmfUKBUHU"
-      }
+      "url": "${UPTIME_MCP_URL:-https://mcp.uptime.com/mcp}"
     }
   }
 }
