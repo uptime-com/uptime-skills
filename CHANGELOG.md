@@ -8,6 +8,7 @@
 
 ### Changed
 
+- Signing in to the Uptime.com MCP server no longer uses a pre-registered OAuth client id; Claude Code identifies itself to uptime.com on its own
 - Skills, references and agents match the tools of Uptime.com MCP server 0.18.0: per-type `update_<type>_check` tools, `email_list`/`sms_list` on contacts, `threshold` for SSL, WHOIS and RDAP expiry warnings, `service_name` and `locations` for CloudStatus
 - dashboard-management describes dashboards as check selections (by tag or check id) with services, alerts and metrics sections, replacing the widget model the server does not have
 - status-page-management covers components linked to checks through `service_id`, group components, and the `INCIDENT`/`SCHEDULED_MAINTENANCE` incident types, and hands follow-up incident updates to the web app
