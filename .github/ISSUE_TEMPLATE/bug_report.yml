@@ -1,0 +1,82 @@
+name: Bug Report
+description: Report incorrect skill behavior, wrong check configuration, or workflow failure
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which skill or agent exhibited the bug?
+      options:
+        - "skill: monitoring-planning"
+        - "skill: understanding-check-types"
+        - "skill: transaction-scripting"
+        - "skill: api-scripting"
+        - "skill: monitoring-optimization"
+        - "skill: performance-reporting"
+        - "skill: incident-triage"
+        - "skill: dashboard-management"
+        - "skill: status-page-management"
+        - "skill: reporting-issues"
+        - "agent: transaction-scripting"
+        - "agent: api-scripting"
+        - "reference material"
+        - "plugin configuration"
+    validations:
+      required: true
+
+  - type: textarea
+    id: trigger-prompt
+    attributes:
+      label: Trigger prompt
+      description: The prompt you gave Claude Code that triggered the behavior.
+      placeholder: "Set up monitoring for example.com"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include check configurations, tool call sequences, or output if relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: mcp-errors
+    attributes:
+      label: MCP tool errors
+      description: Paste any MCP tool error output if applicable.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: claude-code-version
+    attributes:
+      label: Claude Code version
+      description: "Output of `claude --version`"
+      placeholder: "1.0.x"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: model
+    attributes:
+      label: Model
+      description: Which model was used?
+      options:
+        - Opus
+        - Sonnet
+        - Haiku
+        - Unknown
+    validations:
+      required: false
